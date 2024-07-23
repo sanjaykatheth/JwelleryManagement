@@ -19,4 +19,6 @@ public interface UserServiceRepo {
     Boolean existsByEmail(String email);
 
     Page<User> findByRolesIn(Set<Role> roles, Pageable pageable);
+
+    Optional<User> findByEmail(String email);
 }

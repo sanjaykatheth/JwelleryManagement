@@ -1,6 +1,7 @@
 package com.jewelleryshop.management.controller;
 
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -75,6 +76,7 @@ public class AuthController {
 
             return ResponseEntity.ok(new JwtResponse(roles, jwtToken, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail()));
         } catch (BadCredentialsException e) {
+        	e.printStackTrace();
             logger.warn("User {} not found or invalid credentials", loginRequest.getEmail());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponse(ResponseMessage.USERNAME_NOT_PERSENT));
         }
@@ -109,7 +111,24 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse(ResponseMessage.USER_REGISTERED_SUCCESSFULLY));
     }
 
+    @PostMapping("/admin/signup")
+    public ResponseEntity<?> adminRegisterUser() {
+    	User user = new User(
+    		    666815L, // id as Long
+    		    "admin",
+    		    "admin@gmail.com",
+    		    encoder.encode("admin@123"),
+    		    Collections.emptyList() // empty list for authorities
+    		);
+        Set<Role> roles = new HashSet<>();
 
+        Role rangerRole = Role.ROLE_ADMIN;
+        roles.add(rangerRole);
+
+        user.setRoles(roles);
+        userRepository.saveUser(user);
+        return ResponseEntity.ok(new MessageResponse(ResponseMessage.USER_REGISTERED_SUCCESSFULLY));
+    }
  
 
 }

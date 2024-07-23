@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import com.jewelleryshop.management.model.Role;
@@ -46,6 +48,14 @@ public class UserServiceRepoImpl implements UserServiceRepo {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+    public Optional<User> findByEmail(String email) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("email").is(email));
+        User user = mongoTemplate.findOne(query, User.class);
+        return Optional.ofNullable(user);
+    }
 
 	
 }
