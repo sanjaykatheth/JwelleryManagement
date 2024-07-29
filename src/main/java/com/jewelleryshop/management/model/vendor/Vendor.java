@@ -1,4 +1,6 @@
-package com.jewelleryshop.management.model;
+package com.jewelleryshop.management.model.vendor;
+
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -14,11 +16,10 @@ import lombok.NoArgsConstructor;
 public class Vendor {
 	@Id
 	private String id;
-	private String name;
-	private String phoneNumber;
-	private String emailAddress;
-	private String photograph;
-	private String address;
-	private String businessType;
-	private Lot lotDetails;
+	private Details details;
+	private FormDetail formDetail;
+	private List<BankDetails> bankDetailList;
+	private AccountDepartment accountDepartment;
+	private PaymentTerms paymentTerms;
+	private List<Product> gallery;
 }

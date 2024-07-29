@@ -3,7 +3,7 @@ package com.jewelleryshop.management.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jewelleryshop.management.model.Vendor;
+import com.jewelleryshop.management.model.vendor.Vendor;
 import com.jewelleryshop.management.repo.VendorRepository;
 import com.jewelleryshop.management.service.VendorService;
 
