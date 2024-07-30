@@ -1,25 +1,18 @@
 package com.jewelleryshop.management.model.vendor;
 
-import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Document(collection = "vendors")
+@Entity
 public class Vendor {
+
 	@Id
 	private String id;
-	private Details details;
-	private FormDetail formDetail;
-	private List<BankDetails> bankDetailList;
-	private AccountDepartment accountDepartment;
-	private PaymentTerms paymentTerms;
-	private List<Product> gallery;
+
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "contactdetails_id", referencedColumnName = "id")
+	private ContactDetails contactDetails;
 }
