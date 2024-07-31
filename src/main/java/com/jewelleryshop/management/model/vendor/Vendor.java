@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.jewelleryshop.management.model.enums.VendorStage;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,10 +18,13 @@ import lombok.NoArgsConstructor;
 public class Vendor {
 	@Id
 	private String id;
-	private Details details;
-	private FormDetail formDetail;
+	private ContactDetails contactDetails;
+	private List<DealerInfo> details;
+	private FirmDetail formDetail;
 	private List<BankDetails> bankDetailList;
 	private AccountDepartment accountDepartment;
 	private PaymentTerms paymentTerms;
 	private List<Product> gallery;
+	private VendorStage stage;
+	
 }

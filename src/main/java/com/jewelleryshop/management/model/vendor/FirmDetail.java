@@ -2,9 +2,13 @@ package com.jewelleryshop.management.model.vendor;
 
 import java.util.List;
 
-import org.springframework.data.annotation.Id;
+import com.jewelleryshop.management.model.enums.DealerType;
+import com.jewelleryshop.management.model.enums.Designation;
 
-public class FormDetail {
+import lombok.Data;
+
+@Data
+public class FirmDetail {
 
 	private String name;
 	private String phoneNumber;
@@ -13,4 +17,6 @@ public class FormDetail {
 	private String address;
 	private List<Client> clientList;
 	private List<Branch> branchList;
+	private List<DealerType> dealerType;
+	private List<Designation> Designation;
 }
