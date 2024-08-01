@@ -1,9 +1,10 @@
 package com.jewelleryshop.management.model.enums;
 
 public enum VendorStage {
-    CONTACT,
+	INITIAL,
+	CONTACT,
+	FIRM_DETAIL,
     DETAILS,
-    FORM_DETAIL,
     BANK_DETAILS,
     ACCOUNT_DEPARTMENT,
     PAYMENT_TERMS,

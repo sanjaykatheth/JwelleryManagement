@@ -1,12 +1,12 @@
 package com.jewelleryshop.management.model.vendor;
 
-import org.springframework.data.annotation.Id;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.jewelleryshop.management.model.enums.Designation;
 
 import lombok.Data;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ContactDetails {
 	
 	private Designation designation;
