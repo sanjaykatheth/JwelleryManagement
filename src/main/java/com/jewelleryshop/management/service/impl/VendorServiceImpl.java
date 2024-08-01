@@ -26,78 +26,18 @@ public class VendorServiceImpl implements VendorService {
 	private VendorRepository vendorRepository;
 
 	@Override
-	public Vendor createVendor(VendorUpdateRequest vendorRequest, MultipartFile businessCardUrl,
+	public Vendor createVendor(ContactDetails vendorRequest, MultipartFile businessCardUrl,
 			MultipartFile profileImageUrl) {
-		Vendor vendor = saveVendor(vendorRequest,businessCardUrl,profileImageUrl);
-		Vendor updatedVendor = vendorRepository.updateVendorStage(vendor);
-		return updatedVendor;
+		Vendor vendor = saveVendor(vendorRequest, businessCardUrl, profileImageUrl);
+		return vendor;
 	}
 
-	private Vendor saveVendor(VendorUpdateRequest vendorRequest,MultipartFile businessCardUrl,
+	private Vendor saveVendor(ContactDetails contactDetails, MultipartFile businessCardUrl,
 			MultipartFile profileImageUrl) {
-		logger.debug("Saving vendor with request: {}", vendorRequest);
-		Vendor vendor;
-
-		if (StringUtils.isEmpty(vendorRequest.getVendorId()) && VENDOR_SETUP.equals(vendorRequest.getStep())) {
-			vendor = new Vendor();
-		} else {
-			if (StringUtils.isEmpty(vendorRequest.getVendorId())) {
-				throw new IllegalArgumentException("Vendor ID is required");
-			}
-
-			vendor = vendorRepository.findById(vendorRequest.getVendorId());
-			if (vendor == null) {
-				throw new IllegalArgumentException("Vendor not found with ID: " + vendorRequest.getVendorId());
-			}
-		}
-		if (vendorRequest.getStep() != null) {
-			switch (vendorRequest.getStep()) {
-			case VENDOR_SETUP:
-				vendor.setStage(VendorStage.INITIAL);
-				break;
-			case CONTACT_DETAILS:
-                ContactDetails contactDetails = vendorRequest.getContactDetails();
-                if (contactDetails != null) {
-                    // Set contact details
-                    vendor.setContactDetails(contactDetails);
-
-                    // Process and set business card URL if provided
-                    if (businessCardUrl != null && !businessCardUrl.isEmpty()) {
-                        String businessCardUrlStr = uploadFile(businessCardUrl);
-                        contactDetails.setBusinessCardUrl(businessCardUrlStr);
-                    }
-
-                    // Process and set profile image URL if provided
-                    if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
-                        String profileImageUrlStr = uploadFile(profileImageUrl);
-                        contactDetails.setProfileImageUrl(profileImageUrlStr);
-                    }
-                }
-			case FIRM_DETAILS:
-				vendor.setFirmDetail(vendorRequest.getFirmDetail());
-				break;
-			case BANK_DETAILS:
-				vendor.setBankDetailList(vendorRequest.getBankDetailList());
-				break;
-			case ACCOUNT_DEPARTMENT:
-				vendor.setAccountDepartment(vendorRequest.getAccountDepartment());
-				break;
-			case PAYMENT_TERMS:
-				vendor.setPaymentTerms(vendorRequest.getPaymentTerms());
-				break;
-			case GALLERY:
-				vendor.setGallery(vendorRequest.getGallery());
-				break;
-			case VENDOR_STAGE:
-				vendor.setStage(vendorRequest.getStage());
-				break;
-			default:
-				throw new IllegalArgumentException("Invalid step");
-			}
-		}
-		Vendor savedVendor = vendorRepository.save(vendor);
-		logger.info("Vendor saved with ID: {}", savedVendor.getId());
-		return savedVendor;
+		logger.debug("Saving vendor with request: {}", contactDetails);
+		Vendor vendor = new Vendor();
+		vendor.setContactDetails(contactDetails);
+		return vendorRepository.save(vendor);
 	}
 
 	@Override
@@ -110,14 +50,15 @@ public class VendorServiceImpl implements VendorService {
 		List<Vendor> vendor = vendorRepository.findAllVendors();
 		return vendor;
 	}
+
 	private String uploadFile(MultipartFile file) {
-	    // Implement your file upload logic here
-	    // For example, save the file to a server or cloud storage and return the URL
-	    // This is a placeholder implementation
-	    String fileName = file.getOriginalFilename();
-	    String fileUrl = "http://yourserver.com/uploads/" + fileName;
-	    // Save the file to the server or cloud storage
-	    return fileUrl;
+		// Implement your file upload logic here
+		// For example, save the file to a server or cloud storage and return the URL
+		// This is a placeholder implementation
+		String fileName = file.getOriginalFilename();
+		String fileUrl = "http://yourserver.com/uploads/" + fileName;
+		// Save the file to the server or cloud storage
+		return fileUrl;
 	}
 
 }

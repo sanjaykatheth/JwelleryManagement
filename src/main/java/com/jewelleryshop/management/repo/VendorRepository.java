@@ -10,6 +10,4 @@ public interface VendorRepository {
 	Vendor findById(String id); // Changed to Optional<Vendor>
 
 	List<Vendor> findAllVendors();
-
-	Vendor updateVendorStage(Vendor savedVendor);
 }

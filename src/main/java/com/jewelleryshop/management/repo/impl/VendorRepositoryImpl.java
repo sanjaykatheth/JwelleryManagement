@@ -35,36 +35,7 @@ public class VendorRepositoryImpl implements VendorRepository {
 		return mongoTemplate.findAll(Vendor.class);
 	}
 
-	@Override
-	public Vendor updateVendorStage(Vendor vendor) {
-		VendorStage newStage = determineNewStage(vendor);
-		Query query = new Query(Criteria.where("id").is(vendor.getId()));
-		Update update = new Update().set("stage", newStage);
-		mongoTemplate.updateFirst(query, update, Vendor.class);
-		return mongoTemplate.findOne(query, Vendor.class);
-	}
+	
 
-	private VendorStage determineNewStage(Vendor vendor) {
-		switch (vendor.getStage()) {
-		case INITIAL:
-			if (vendor.getContactDetails() != null) {
-				return VendorStage.CONTACT;
-			}
-			break;
-		case CONTACT:
-			if (vendor.getContactDetails() != null) {
-				return VendorStage.FIRM_DETAIL;
-			}
-			break;
-		case FIRM_DETAIL:
-			if (vendor.getFirmDetail() != null) {
-				return VendorStage.BANK_DETAILS;
-			}
-			break;
-		// Add remaining cases for other stages
-		default:
-			break;
-		}
-		return vendor.getStage(); // Return existing stage if no change
-	}
+	
 }
