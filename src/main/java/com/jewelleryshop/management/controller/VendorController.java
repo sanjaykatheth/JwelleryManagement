@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.jewelleryshop.management.exception.ResourceNotFoundException;
+import com.jewelleryshop.management.model.vendor.BankDetails;
 import com.jewelleryshop.management.model.vendor.FirmDetail;
 import com.jewelleryshop.management.model.vendor.Vendor;
 import com.jewelleryshop.management.service.VendorService;
@@ -28,10 +29,10 @@ public class VendorController {
 	private VendorService vendorService;
 
 	@PostMapping
-	public ResponseEntity<Vendor> createVendor(@RequestParam("vendorRequest") String vendorRequestString,
-			@RequestParam("businessCardUrl") MultipartFile businessCardUrl,
-			@RequestParam("profileImageUrl") MultipartFile profileImageUrl) {
-		vendorService.saveVendorContactDetails(vendorRequestString, businessCardUrl, profileImageUrl);
+	public ResponseEntity<Vendor> createVendor(@RequestParam("vendorRequest") String vendorRequest,
+			@RequestParam(value = "businessCardUrl", required = false) MultipartFile businessCardUrl,
+			@RequestParam(value = "profileImageUrl", required = false) MultipartFile profileImageUrl) {
+		vendorService.saveVendorContactDetails(vendorRequest, businessCardUrl, profileImageUrl);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
@@ -52,6 +53,13 @@ public class VendorController {
 
 		vendorService.updateVendorGallery(vendorId, productGallery, productImages);
 		return null;
+	}
+
+	@PutMapping("/{vendorId}/bank-details")
+	public ResponseEntity<String> updateBankDetails(@PathVariable("vendorId") String vendorId,
+			@RequestBody List<BankDetails> bankDetails) {
+		vendorService.updateVendorBankDetails(vendorId, bankDetails);
+		return ResponseEntity.ok("Bank details updated successfully");
 	}
 
 	@GetMapping("/{id}")

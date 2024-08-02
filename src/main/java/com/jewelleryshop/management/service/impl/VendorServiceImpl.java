@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.jewelleryshop.management.exception.ResourceNotFoundException;
+import com.jewelleryshop.management.model.vendor.BankDetails;
 import com.jewelleryshop.management.model.vendor.ContactDetails;
 import com.jewelleryshop.management.model.vendor.FirmDetail;
 import com.jewelleryshop.management.model.vendor.Product;
@@ -48,14 +50,14 @@ public class VendorServiceImpl implements VendorService {
 			return;
 		}
 
-		// Save files and update URLs
+		String imageId = UUID.randomUUID().toString();
 		if (businessCardUrl != null && !businessCardUrl.isEmpty()) {
-			String businessCardPath = imageUtil.saveFile(businessCardUrl, "business_cards");
+			String businessCardPath = imageUtil.saveFile(businessCardUrl,imageId);
 			vendorUpdateRequest.setBusinessCardUrl(businessCardPath);
 		}
 
 		if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
-			String profileImagePath = imageUtil.saveFile(profileImageUrl, "profile_images");
+			String profileImagePath = imageUtil.saveFile(profileImageUrl,imageId);
 			vendorUpdateRequest.setProfileImageUrl(profileImagePath);
 		}
 		Vendor vendor = new Vendor();
@@ -105,6 +107,20 @@ public class VendorServiceImpl implements VendorService {
 		vendorRepository.save(vendor);
 
 	}
+	@Override
+	public void updateVendorBankDetails(String vendorId, List<BankDetails> bankDetails) {
+		 if (vendorId == null || bankDetails == null) {
+		        throw new IllegalArgumentException("Vendor ID or bank details are missing");
+		    }
+
+		    Vendor vendor = vendorRepository.findById(vendorId);
+		    if (vendor != null) {
+		        vendor.setBankDetailList(bankDetails); 
+		        vendorRepository.save(vendor);
+		    } else {
+		        throw new ResourceNotFoundException("Vendor not found with ID: " + vendorId);
+		    }	
+	}
 
 	@Override
 	public Vendor getVendorById(String id) {
@@ -116,5 +132,7 @@ public class VendorServiceImpl implements VendorService {
 		List<Vendor> vendor = vendorRepository.findAllVendors();
 		return vendor;
 	}
+
+	
 
 }

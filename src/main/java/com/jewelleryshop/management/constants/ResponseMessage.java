@@ -1,5 +1,6 @@
 package com.jewelleryshop.management.constants;
 
+
 import lombok.Getter;
 
 @Getter

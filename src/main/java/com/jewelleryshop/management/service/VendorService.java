@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.jewelleryshop.management.model.vendor.BankDetails;
 import com.jewelleryshop.management.model.vendor.FirmDetail;
 import com.jewelleryshop.management.model.vendor.Vendor;
 
@@ -19,5 +20,7 @@ public interface VendorService {
 
 	void saveVendorContactDetails(String vendorRequestString, MultipartFile businessCardUrl,
 			MultipartFile profileImageUrl);
+
+	void updateVendorBankDetails(String vendorId, List<BankDetails> bankDetails);
 
 }
