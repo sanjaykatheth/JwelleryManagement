@@ -5,12 +5,9 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
-import com.jewelleryshop.management.model.enums.VendorStage;
+import com.jewelleryshop.management.exception.VendorNotFoundException;
 import com.jewelleryshop.management.model.vendor.Vendor;
 import com.jewelleryshop.management.repo.VendorRepository;
 
@@ -27,7 +24,12 @@ public class VendorRepositoryImpl implements VendorRepository {
 
 	@Override
 	public Vendor findById(String id) {
-		return mongoTemplate.findById(new ObjectId(id), Vendor.class);
+
+		Vendor vendor = mongoTemplate.findById(new ObjectId(id), Vendor.class);
+		if (vendor == null) {
+			throw new VendorNotFoundException("Vendor not found with ID: " + vendor.getId());
+		}
+		return vendor;
 	}
 
 	@Override
@@ -35,7 +37,4 @@ public class VendorRepositoryImpl implements VendorRepository {
 		return mongoTemplate.findAll(Vendor.class);
 	}
 
-	
-
-	
 }

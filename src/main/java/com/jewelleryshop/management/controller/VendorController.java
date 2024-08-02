@@ -8,16 +8,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.jewelleryshop.management.model.vendor.ContactDetails;
+import com.jewelleryshop.management.exception.ResourceNotFoundException;
+import com.jewelleryshop.management.model.vendor.FirmDetail;
 import com.jewelleryshop.management.model.vendor.Vendor;
-import com.jewelleryshop.management.model.vendor.VendorUpdateRequest;
 import com.jewelleryshop.management.service.VendorService;
 
 @RestController
@@ -31,17 +31,27 @@ public class VendorController {
 	public ResponseEntity<Vendor> createVendor(@RequestParam("vendorRequest") String vendorRequestString,
 			@RequestParam("businessCardUrl") MultipartFile businessCardUrl,
 			@RequestParam("profileImageUrl") MultipartFile profileImageUrl) {
+		vendorService.saveVendorContactDetails(vendorRequestString, businessCardUrl, profileImageUrl);
+		return new ResponseEntity<>(HttpStatus.CREATED);
+	}
 
-		Gson gsonObj = new Gson();
-		ContactDetails vendorUpdateRequest = null;
+	@PutMapping("/{vendorId}/firm-details")
+	public ResponseEntity<Void> updateFirmDetails(@PathVariable String vendorId, @RequestBody FirmDetail firmDetail) {
 		try {
-			vendorUpdateRequest = gsonObj.fromJson(vendorRequestString, ContactDetails.class);
-		} catch (JsonSyntaxException e) {
-			e.printStackTrace();
-			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+			vendorService.updateFirmDetails(vendorId, firmDetail);
+			return new ResponseEntity<>(HttpStatus.OK);
+		} catch (ResourceNotFoundException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Resource not found
 		}
-	    Vendor createdVendor = vendorService.createVendor(vendorUpdateRequest, businessCardUrl, profileImageUrl);
-		return new ResponseEntity<>(createdVendor, HttpStatus.CREATED);
+	}
+
+	@PutMapping("/{vendorId}/gallery")
+	public ResponseEntity<String> updateGallery(@PathVariable("vendorId") String vendorId,
+			@RequestParam("productGallery") String productGallery,
+			@RequestParam("productImages") List<MultipartFile> productImages) {
+
+		vendorService.updateVendorGallery(vendorId, productGallery, productImages);
+		return null;
 	}
 
 	@GetMapping("/{id}")
