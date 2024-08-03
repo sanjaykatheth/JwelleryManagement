@@ -6,7 +6,11 @@ import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import com.jewelleryshop.management.exception.VendorNotFoundException;
@@ -40,8 +44,10 @@ public class VendorRepositoryImpl implements VendorRepository {
 	}
 
 	@Override
-	public List<Vendor> findAllVendors() {
-		return mongoTemplate.findAll(Vendor.class);
+	public Page<Vendor> findAllVendors(Pageable pageable) {
+	    Query query = new Query();
+	    long count = mongoTemplate.count(query, Vendor.class); // Get total count of records
+	    List<Vendor> vendors = mongoTemplate.find(query.with(pageable), Vendor.class);
+	    return new PageImpl<>(vendors, pageable, count);
 	}
-
 }

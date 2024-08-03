@@ -2,6 +2,7 @@ package com.jewelleryshop.management.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.jewelleryshop.management.model.vendor.BankDetails;
@@ -12,7 +13,7 @@ public interface VendorService {
 
 	Vendor getVendorById(String id);
 
-	List<Vendor> findAllVendors();
+	Page<Vendor> findAllVendors(int page, int size);
 
 	void updateFirmDetails(String vendorId, FirmDetail firmDetail);
 

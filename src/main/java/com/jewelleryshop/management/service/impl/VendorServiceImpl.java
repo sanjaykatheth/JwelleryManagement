@@ -7,6 +7,9 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -128,11 +131,13 @@ public class VendorServiceImpl implements VendorService {
 	}
 
 	@Override
-	public List<Vendor> findAllVendors() {
-		List<Vendor> vendor = vendorRepository.findAllVendors();
+	public Page<Vendor> findAllVendors(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+		 Page<Vendor> vendor = vendorRepository.findAllVendors(pageable);
 		return vendor;
 	}
 
+	
 	
 
 }

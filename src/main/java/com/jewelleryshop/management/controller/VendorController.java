@@ -3,6 +3,7 @@ package com.jewelleryshop.management.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -73,7 +74,9 @@ public class VendorController {
 	}
 
 	@GetMapping
-	public List<Vendor> getAllVendors() {
-		return vendorService.findAllVendors(); // Retrieves all vendors
+	public Page<Vendor> getAllVendors(
+	    @RequestParam(defaultValue = "0") int page, 
+	    @RequestParam(defaultValue = "10") int size) {
+	    return vendorService.findAllVendors(page, size); // Retrieves paginated vendors
 	}
 }
