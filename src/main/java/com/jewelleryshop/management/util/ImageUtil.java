@@ -19,7 +19,7 @@ public class ImageUtil {
 	@Value("${image.path}")
 	private String imagePathPrefix;
 
-	public String saveFile(MultipartFile file, String imageId) {
+	public String saveImagePath(MultipartFile file, String imageId) {
 		Path uploadPath = Paths.get(imagePathPrefix);
 		if (!Files.exists(uploadPath)) {
 			try {
@@ -28,15 +28,33 @@ public class ImageUtil {
 				e.printStackTrace();
 			}
 		}
+        String originalFileName = file.getOriginalFilename();
+        if (originalFileName == null) {
+            throw new IllegalArgumentException("File name cannot be null");
+        }
+        String fileExtension = getFileExtension(originalFileName);
+        String fileName = imageId + "-" + originalFileName;
+        Path filePath = uploadPath.resolve(fileName);
+
 		try (InputStream inputStream = file.getInputStream()) {
-			BufferedImage jfifImage = ImageIO.read(inputStream);
-			if (jfifImage != null) {
-				Path filePath = uploadPath.resolve(imageId +"-"+ file.getName() + ".gif");
-				ImageIO.write(jfifImage, "gif", filePath.toFile());
+			BufferedImage image = ImageIO.read(inputStream);
+			if (image != null) {
+				if (!ImageIO.write(image, fileExtension, filePath.toFile())) {
+					throw new IllegalArgumentException("Unsupported image format: " + fileExtension);
+				}
 			}
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
-		return imageId;
+	 return fileName;
 	}
+
+	private String getFileExtension(String fileName) {
+        int lastDotIndex = fileName.lastIndexOf('.');
+        if (lastDotIndex >= 0) {
+            return fileName.substring(lastDotIndex + 1).toLowerCase();
+        } else {
+            throw new IllegalArgumentException("File name does not have an extension");
+        }
+    }
 }

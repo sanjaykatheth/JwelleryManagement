@@ -56,12 +56,12 @@ public class VendorServiceImpl implements VendorService {
 
 		String imageId = UUID.randomUUID().toString();
 		if (businessCardUrl != null && !businessCardUrl.isEmpty()) {
-			String businessCardPath = imageUtil.saveFile(businessCardUrl, imageId);
+			String businessCardPath = imageUtil.saveImagePath(businessCardUrl, imageId);
 			vendorUpdateRequest.setBusinessCardUrl(businessCardPath);
 		}
 
 		if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
-			String profileImagePath = imageUtil.saveFile(profileImageUrl, imageId);
+			String profileImagePath = imageUtil.saveImagePath(profileImageUrl, imageId);
 			vendorUpdateRequest.setProfileImageUrl(profileImagePath);
 		}
 		Vendor vendor = new Vendor();
@@ -98,11 +98,11 @@ public class VendorServiceImpl implements VendorService {
 
 		Vendor vendor = vendorRepository.findById(vendorId);
 		if (!CollectionUtils.isEmpty(productImages)) {
-			List<String> imageUrls = new ArrayList<>(); // Store image URLs
+			List<String> imageUrls = new ArrayList<>(); 
 			for (MultipartFile productImage : productImages) {
 				String imageId = UUID.randomUUID().toString();
-				String imageUrl = imageUtil.saveFile(productImage, imageId);
-				imageUrls.add(imageUrl); // Add URL to list
+				String imageUrl = imageUtil.saveImagePath(productImage, imageId);
+				imageUrls.add(imageUrl); 
 			}
 
 			productGallery.setProductImage(imageUrls);
