@@ -39,7 +39,7 @@ public class VendorController {
 	}
 
 	@PutMapping("/{vendorId}/firm-details")
-	public ResponseEntity<Void> updateFirmDetails(@PathVariable String vendorId, @RequestBody FirmDetail firmDetail) {
+	public ResponseEntity<Void> updateFirmDetails(@PathVariable String vendorId, @RequestBody List<FirmDetail> firmDetail) {
 		try {
 			vendorService.updateFirmDetails(vendorId, firmDetail);
 			return new ResponseEntity<>(HttpStatus.OK);

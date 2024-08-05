@@ -18,7 +18,7 @@ public class Vendor {
 	private String id;
 	private ContactDetails contactDetails;
 	private List<DealerInfo> details;
-	private FirmDetail firmDetail;
+	private List<FirmDetail> firmDetail;
 	private List<BankDetails> bankDetailList;
 	private AccountDepartment accountDepartment;
 	private Product gallery;

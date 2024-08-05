@@ -71,7 +71,7 @@ public class VendorServiceImpl implements VendorService {
 	}
 
 	@Override
-	public void updateFirmDetails(String vendorId, FirmDetail firmDetail) {
+	public void updateFirmDetails(String vendorId, List<FirmDetail> firmDetail) {
 		if (vendorId == null) {
 			throw new IllegalArgumentException("Vendor ID is missing from product gallery data");
 		}

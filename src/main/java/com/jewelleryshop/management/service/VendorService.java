@@ -16,8 +16,6 @@ public interface VendorService {
 
 	Page<Vendor> findAllVendors(int page, int size);
 
-	void updateFirmDetails(String vendorId, FirmDetail firmDetail);
-
 	void updateVendorGallery(String vendorId, String productGalleryJson2, List<MultipartFile> productImages);
 
 	Vendor saveVendorContactDetails(String vendorRequestString, MultipartFile businessCardUrl,
@@ -26,5 +24,7 @@ public interface VendorService {
 	void updateVendorBankDetails(String vendorId, List<BankDetails> bankDetails);
 
 	void updateAccountDepartment(String vendorId, AccountDepartment accountDepartment);
+
+	void updateFirmDetails(String vendorId, List<FirmDetail> firmDetail);
 
 }
