@@ -20,7 +20,7 @@ public interface VendorService {
 
 	void updateVendorGallery(String vendorId, String productGalleryJson2, List<MultipartFile> productImages);
 
-	void saveVendorContactDetails(String vendorRequestString, MultipartFile businessCardUrl,
+	Vendor saveVendorContactDetails(String vendorRequestString, MultipartFile businessCardUrl,
 			MultipartFile profileImageUrl);
 
 	void updateVendorBankDetails(String vendorId, List<BankDetails> bankDetails);

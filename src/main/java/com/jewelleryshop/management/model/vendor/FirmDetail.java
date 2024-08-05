@@ -11,12 +11,11 @@ import lombok.Data;
 public class FirmDetail {
 
 	private String name;
-	private String phoneNumber;
+	private String panNumber;
 	private String aadhaarNumber;
 	private String gstNo;
 	private String address;
 	private List<Client> clientList;
 	private List<Branch> branchList;
 	private List<DealerType> dealerType;
-	private List<Designation> Designation;
 }

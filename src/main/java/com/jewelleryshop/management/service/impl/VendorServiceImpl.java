@@ -38,7 +38,7 @@ public class VendorServiceImpl implements VendorService {
 	@Autowired
 	private VendorRepository vendorRepository;
 
-	public void saveVendorContactDetails(String updateContactDetails, MultipartFile businessCardUrl,
+	public Vendor saveVendorContactDetails(String updateContactDetails, MultipartFile businessCardUrl,
 			MultipartFile profileImageUrl) {
 		logger.debug("Saving vendor with request: {}", updateContactDetails);
 
@@ -51,7 +51,7 @@ public class VendorServiceImpl implements VendorService {
 		}
 		if (vendorUpdateRequest == null) {
 			logger.error("Failed to parse contact details");
-			return;
+			return null;
 		}
 
 		String imageId = UUID.randomUUID().toString();
@@ -67,7 +67,7 @@ public class VendorServiceImpl implements VendorService {
 		Vendor vendor = new Vendor();
 		vendor.setContactDetails(vendorUpdateRequest);
 
-		vendorRepository.save(vendor);
+		return vendorRepository.save(vendor);
 	}
 
 	@Override

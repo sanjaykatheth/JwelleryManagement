@@ -20,7 +20,7 @@ public class ImageUtil {
 	private String imagePathPrefix;
 
 	public String saveImagePath(MultipartFile file, String imageId) {
-		Path uploadPath = Paths.get(imagePathPrefix);
+        Path uploadPath= Paths.get(imagePathPrefix).toAbsolutePath().normalize();
 		if (!Files.exists(uploadPath)) {
 			try {
 				Files.createDirectories(uploadPath);
@@ -46,7 +46,7 @@ public class ImageUtil {
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
-	 return fileName;
+	 return filePath.toString();
 	}
 
 	private String getFileExtension(String fileName) {

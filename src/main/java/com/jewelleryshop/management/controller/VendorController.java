@@ -34,8 +34,8 @@ public class VendorController {
 	public ResponseEntity<Vendor> createVendor(@RequestParam("vendorRequest") String vendorRequest,
 			@RequestParam(value = "businessCardUrl", required = false) MultipartFile businessCardUrl,
 			@RequestParam(value = "profileImageUrl", required = false) MultipartFile profileImageUrl) {
-		vendorService.saveVendorContactDetails(vendorRequest, businessCardUrl, profileImageUrl);
-		return new ResponseEntity<>(HttpStatus.CREATED);
+		Vendor vendor = vendorService.saveVendorContactDetails(vendorRequest, businessCardUrl, profileImageUrl);
+		return new ResponseEntity<>(vendor,HttpStatus.CREATED);
 	}
 
 	@PutMapping("/{vendorId}/firm-details")
