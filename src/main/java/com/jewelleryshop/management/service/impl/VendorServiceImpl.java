@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,13 +72,16 @@ public class VendorServiceImpl implements VendorService {
 	}
 
 	@Override
-	public void updateFirmDetails(String vendorId, List<FirmDetail> firmDetail) {
+	public void updateFirmDetails(String vendorId, List<FirmDetail> firmDetailList) {
 		if (vendorId == null) {
 			throw new IllegalArgumentException("Vendor ID is missing from product gallery data");
 		}
 		Vendor vendor = vendorRepository.findById(vendorId);
 		if (vendor != null) {
-			vendor.setFirmDetail(firmDetail);
+			for (FirmDetail firmDetail : firmDetailList) {
+				firmDetail.setId(new ObjectId().toString());
+			}
+			vendor.setFirmDetail(firmDetailList);
 			vendorRepository.save(vendor);
 		}
 	}
@@ -98,11 +102,11 @@ public class VendorServiceImpl implements VendorService {
 
 		Vendor vendor = vendorRepository.findById(vendorId);
 		if (!CollectionUtils.isEmpty(productImages)) {
-			List<String> imageUrls = new ArrayList<>(); 
+			List<String> imageUrls = new ArrayList<>();
 			for (MultipartFile productImage : productImages) {
 				String imageId = UUID.randomUUID().toString();
 				String imageUrl = imageUtil.saveImagePath(productImage, imageId);
-				imageUrls.add(imageUrl); 
+				imageUrls.add(imageUrl);
 			}
 
 			productGallery.setProductImage(imageUrls);
