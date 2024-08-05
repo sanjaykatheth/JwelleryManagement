@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.jewelleryshop.management.model.vendor.AccountDepartment;
 import com.jewelleryshop.management.model.vendor.BankDetails;
 import com.jewelleryshop.management.model.vendor.FirmDetail;
 import com.jewelleryshop.management.model.vendor.Vendor;
@@ -23,5 +24,7 @@ public interface VendorService {
 			MultipartFile profileImageUrl);
 
 	void updateVendorBankDetails(String vendorId, List<BankDetails> bankDetails);
+
+	void updateAccountDepartment(String vendorId, AccountDepartment accountDepartment);
 
 }

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.jewelleryshop.management.exception.ResourceNotFoundException;
+import com.jewelleryshop.management.model.vendor.AccountDepartment;
 import com.jewelleryshop.management.model.vendor.BankDetails;
 import com.jewelleryshop.management.model.vendor.FirmDetail;
 import com.jewelleryshop.management.model.vendor.Vendor;
@@ -48,19 +49,28 @@ public class VendorController {
 	}
 
 	@PutMapping("/{vendorId}/gallery")
-	public ResponseEntity<String> updateGallery(@PathVariable("vendorId") String vendorId,
+	public ResponseEntity<Void> updateGallery(@PathVariable("vendorId") String vendorId,
 			@RequestParam("productGallery") String productGallery,
 			@RequestParam("productImages") List<MultipartFile> productImages) {
 
 		vendorService.updateVendorGallery(vendorId, productGallery, productImages);
-		return null;
+		return new ResponseEntity<>(HttpStatus.OK); 	
 	}
 
 	@PutMapping("/{vendorId}/bank-details")
-	public ResponseEntity<String> updateBankDetails(@PathVariable("vendorId") String vendorId,
+	public ResponseEntity<Void> updateBankDetails(@PathVariable("vendorId") String vendorId,
 			@RequestBody List<BankDetails> bankDetails) {
 		vendorService.updateVendorBankDetails(vendorId, bankDetails);
-		return ResponseEntity.ok("Bank details updated successfully");
+		return new ResponseEntity<>(HttpStatus.OK);
+
+	}
+
+	@PutMapping("/{vendorId}/account-department")
+	public ResponseEntity<String> updateAccountDepartment(@PathVariable("vendorId") String vendorId,
+			@RequestBody AccountDepartment accountDepartment) {
+
+		vendorService.updateAccountDepartment(vendorId, accountDepartment);
+		return ResponseEntity.ok("Account department updated successfully");
 	}
 
 	@GetMapping("/{id}")
@@ -74,9 +84,8 @@ public class VendorController {
 	}
 
 	@GetMapping
-	public Page<Vendor> getAllVendors(
-	    @RequestParam(defaultValue = "0") int page, 
-	    @RequestParam(defaultValue = "10") int size) {
-	    return vendorService.findAllVendors(page, size); // Retrieves paginated vendors
+	public Page<Vendor> getAllVendors(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size) {
+		return vendorService.findAllVendors(page, size);
 	}
 }

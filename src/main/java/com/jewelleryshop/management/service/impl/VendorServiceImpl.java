@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.jewelleryshop.management.exception.ResourceNotFoundException;
+import com.jewelleryshop.management.model.vendor.AccountDepartment;
 import com.jewelleryshop.management.model.vendor.BankDetails;
 import com.jewelleryshop.management.model.vendor.ContactDetails;
 import com.jewelleryshop.management.model.vendor.FirmDetail;
@@ -55,12 +56,12 @@ public class VendorServiceImpl implements VendorService {
 
 		String imageId = UUID.randomUUID().toString();
 		if (businessCardUrl != null && !businessCardUrl.isEmpty()) {
-			String businessCardPath = imageUtil.saveFile(businessCardUrl,imageId);
+			String businessCardPath = imageUtil.saveFile(businessCardUrl, imageId);
 			vendorUpdateRequest.setBusinessCardUrl(businessCardPath);
 		}
 
 		if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
-			String profileImagePath = imageUtil.saveFile(profileImageUrl,imageId);
+			String profileImagePath = imageUtil.saveFile(profileImageUrl, imageId);
 			vendorUpdateRequest.setProfileImageUrl(profileImagePath);
 		}
 		Vendor vendor = new Vendor();
@@ -110,19 +111,34 @@ public class VendorServiceImpl implements VendorService {
 		vendorRepository.save(vendor);
 
 	}
+
 	@Override
 	public void updateVendorBankDetails(String vendorId, List<BankDetails> bankDetails) {
-		 if (vendorId == null || bankDetails == null) {
-		        throw new IllegalArgumentException("Vendor ID or bank details are missing");
-		    }
+		if (vendorId == null || bankDetails == null) {
+			throw new IllegalArgumentException("Vendor ID or bank details are missing");
+		}
 
-		    Vendor vendor = vendorRepository.findById(vendorId);
-		    if (vendor != null) {
-		        vendor.setBankDetailList(bankDetails); 
-		        vendorRepository.save(vendor);
-		    } else {
-		        throw new ResourceNotFoundException("Vendor not found with ID: " + vendorId);
-		    }	
+		Vendor vendor = vendorRepository.findById(vendorId);
+		if (vendor != null) {
+			vendor.setBankDetailList(bankDetails);
+			vendorRepository.save(vendor);
+		} else {
+			throw new ResourceNotFoundException("Vendor not found with ID: " + vendorId);
+		}
+	}
+
+	@Override
+	public void updateAccountDepartment(String vendorId, AccountDepartment accountDepartment) {
+		if (vendorId == null || accountDepartment == null) {
+			throw new IllegalArgumentException("Vendor ID or account department information is missing");
+		}
+		Vendor vendor = vendorRepository.findById(vendorId);
+		if (vendor != null) {
+			vendor.setAccountDepartment(accountDepartment);
+			vendorRepository.save(vendor);
+		} else {
+			throw new ResourceNotFoundException("Vendor not found with ID: " + vendorId);
+		}
 	}
 
 	@Override
@@ -132,12 +148,8 @@ public class VendorServiceImpl implements VendorService {
 
 	@Override
 	public Page<Vendor> findAllVendors(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-		 Page<Vendor> vendor = vendorRepository.findAllVendors(pageable);
+		Pageable pageable = PageRequest.of(page, size);
+		Page<Vendor> vendor = vendorRepository.findAllVendors(pageable);
 		return vendor;
 	}
-
-	
-	
-
 }

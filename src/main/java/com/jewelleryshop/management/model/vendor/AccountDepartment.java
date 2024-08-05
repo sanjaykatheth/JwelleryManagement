@@ -1,12 +1,20 @@
 package com.jewelleryshop.management.model.vendor;
 
-import java.util.List;
+import org.springframework.data.annotation.Id;
 
-import com.jewelleryshop.management.enums.StockDetails;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public class AccountDepartment {	
-	private String name;
-	private String whatsappNo;
-	private String email;
-	private List<StockDetails> stockDetails;
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class AccountDepartment {
+	@Id
+	private String id;
+	private String pendingOrderValue;
+	private String readyOrderValue;
+	private OpeningBalance openingBalance;
+	private CurrentBalance currentBalancel;
+	private TotalPurchaseTillDate totalPurchaseTillDate;
 }
