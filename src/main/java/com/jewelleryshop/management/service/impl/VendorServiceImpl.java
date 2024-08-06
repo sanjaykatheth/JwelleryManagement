@@ -225,7 +225,7 @@ public class VendorServiceImpl implements VendorService {
 	    List<Vendor> vendorList = vendorRepository.findAllVendors(pageable);
 	    vendorList.forEach(vendor -> {
 	        ContactDetails contactDetail = vendor.getContactDetails();
-	        ProductGallary gallery = vendor.getGallery();
+	      
 
 	        // Process business card URL
 	        String businessCardUrl = contactDetail.getBusinessCardUrl();
@@ -240,7 +240,11 @@ public class VendorServiceImpl implements VendorService {
 	            String normalizedProfileImageUrl = profileImageUrl.replace("\\", "/");
 	            contactDetail.setProfileImageUrl(baseUrl + "/images/" + normalizedProfileImageUrl);
 	        }
-
+	        ProductGallary gallery = vendor.getGallery();
+	        if (gallery == null) {
+	            gallery = new ProductGallary(); // Create an empty gallery
+	            vendor.setGallery(gallery); // Ensure the gallery is set in the vendor
+	        }
 	        // Process product images
 	        List<String> productImageUrls = gallery.getProductImage();
 	        if (productImageUrls != null) {
