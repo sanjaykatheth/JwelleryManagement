@@ -20,7 +20,7 @@ public class ImageUtil {
 	private String imagePathPrefix;
 
 	public String saveImagePath(MultipartFile file, String imageId) {
-        Path uploadPath= Paths.get(imagePathPrefix).toAbsolutePath().normalize();
+		Path uploadPath = Paths.get(imagePathPrefix);
 		if (!Files.exists(uploadPath)) {
 			try {
 				Files.createDirectories(uploadPath);
@@ -28,13 +28,13 @@ public class ImageUtil {
 				e.printStackTrace();
 			}
 		}
-        String originalFileName = file.getOriginalFilename();
-        if (originalFileName == null) {
-            throw new IllegalArgumentException("File name cannot be null");
-        }
-        String fileExtension = getFileExtension(originalFileName);
-        String fileName = imageId + "-" + originalFileName;
-        Path filePath = uploadPath.resolve(fileName);
+		String originalFileName = file.getOriginalFilename();
+		if (originalFileName == null) {
+			throw new IllegalArgumentException("File name cannot be null");
+		}
+		String fileExtension = getFileExtension(originalFileName);
+		String fileName = imageId + "-" + originalFileName;
+		Path filePath = uploadPath.resolve(fileName);
 
 		try (InputStream inputStream = file.getInputStream()) {
 			BufferedImage image = ImageIO.read(inputStream);
@@ -46,15 +46,15 @@ public class ImageUtil {
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
-	 return filePath.toString();
+		return fileName;
 	}
 
 	private String getFileExtension(String fileName) {
-        int lastDotIndex = fileName.lastIndexOf('.');
-        if (lastDotIndex >= 0) {
-            return fileName.substring(lastDotIndex + 1).toLowerCase();
-        } else {
-            throw new IllegalArgumentException("File name does not have an extension");
-        }
-    }
+		int lastDotIndex = fileName.lastIndexOf('.');
+		if (lastDotIndex >= 0) {
+			return fileName.substring(lastDotIndex + 1).toLowerCase();
+		} else {
+			throw new IllegalArgumentException("File name does not have an extension");
+		}
+	}
 }

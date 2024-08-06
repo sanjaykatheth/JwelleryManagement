@@ -3,6 +3,7 @@ package com.jewelleryshop.management.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -52,8 +54,8 @@ public class VendorController {
 
 	@PutMapping("/{vendorId}/gallery")
 	public ResponseEntity<Void> updateGallery(@PathVariable("vendorId") String vendorId,
-			@RequestParam("productGallery") String productGallery,
-			@RequestParam("productImages") List<MultipartFile> productImages) {
+			@RequestPart("productGallery") String productGallery,
+			@RequestPart("productImages") List<MultipartFile> productImages) {
 
 		vendorService.updateVendorGallery(vendorId, productGallery, productImages);
 		return new ResponseEntity<>(HttpStatus.OK);
@@ -96,5 +98,11 @@ public class VendorController {
 	public Page<Vendor> getAllVendors(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {
 		return vendorService.findAllVendors(page, size);
+	}
+
+	@GetMapping("/images/{filename}")
+	public ResponseEntity<Resource> getImages(@PathVariable String filename) throws Exception {
+		return vendorService.serveImages(filename);
+
 	}
 }

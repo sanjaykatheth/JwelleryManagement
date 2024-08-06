@@ -1,5 +1,8 @@
 package com.jewelleryshop.management.service.impl;
 
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -8,9 +11,15 @@ import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,11 +42,17 @@ public class VendorServiceImpl implements VendorService {
 
 	private static final Logger logger = LoggerFactory.getLogger(VendorServiceImpl.class);
 
+	@Value("${image.path}")
+	private String imagePathPrefix;
+
 	@Autowired
 	private ImageUtil imageUtil;
 
 	@Autowired
 	private VendorRepository vendorRepository;
+
+	@Value("${image.path.prefix}")
+	private String baseUrl;
 
 	public Vendor saveVendorContactDetails(String updateContactDetails, MultipartFile businessCardUrl,
 			MultipartFile profileImageUrl) {
@@ -168,8 +183,29 @@ public class VendorServiceImpl implements VendorService {
 	public Page<Vendor> findAllVendors(int page, int size) {
 		logger.debug("Fetching all vendors with page: {}, size: {}", page, size);
 		Pageable pageable = PageRequest.of(page, size);
-		Page<Vendor> vendor = vendorRepository.findAllVendors(pageable);
-		return vendor;
+		List<Vendor> vendorList = vendorRepository.findAllVendors(pageable);
+
+		vendorList.forEach(vendor -> {
+			ContactDetails contactDetail = vendor.getContactDetails();
+
+			// Set the business card URL
+			String businessCardUrl = contactDetail.getBusinessCardUrl();
+			if (businessCardUrl != null && !businessCardUrl.isEmpty()) {
+				// Normalize the path to use forward slashes
+				String normalizedBusinessCardUrl = businessCardUrl.replace("\\", "/");
+				contactDetail.setBusinessCardUrl(baseUrl + "/images/" + normalizedBusinessCardUrl);
+			}
+
+			// Set the profile image URL
+			String profileImageUrl = contactDetail.getProfileImageUrl();
+			if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
+				// Normalize the path to use forward slashes
+				String normalizedProfileImageUrl = profileImageUrl.replace("\\", "/");
+				contactDetail.setProfileImageUrl(baseUrl + "/images/" + normalizedProfileImageUrl);
+			}
+		});
+
+		return new PageImpl<>(vendorList); // Return the updated Page<Vendor>
 	}
 
 	@Override
@@ -189,5 +225,20 @@ public class VendorServiceImpl implements VendorService {
 			logger.error("Vendor not found with ID: {}", vendorId);
 			throw new ResourceNotFoundException("Vendor not found with ID: " + vendorId);
 		}
+	}
+
+	@Override
+	public ResponseEntity<Resource> serveImages(String filename) {
+ 		String imageUrl=imagePathPrefix + "/"+filename;
+		Path path = Paths.get(imageUrl);
+		Resource resource = null;
+		try {
+			resource = new UrlResource(path.toUri());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(resource);
+
 	}
 }

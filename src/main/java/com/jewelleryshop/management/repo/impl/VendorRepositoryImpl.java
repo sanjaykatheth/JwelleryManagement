@@ -45,11 +45,11 @@ public class VendorRepositoryImpl implements VendorRepository {
 	}
 
 	@Override
-	public Page<Vendor> findAllVendors(Pageable pageable) {
+	public List<Vendor> findAllVendors(Pageable pageable) {
 		Query query = new Query();
 		long count = mongoTemplate.count(query, Vendor.class); // Get total count of records
 		List<Vendor> vendors = mongoTemplate.find(query.with(pageable), Vendor.class);
-		return new PageImpl<>(vendors, pageable, count);
+		return vendors;
 	}
 
 	@Override
