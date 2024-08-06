@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
@@ -175,39 +176,90 @@ public class VendorServiceImpl implements VendorService {
 			logger.error("Vendor not found with ID: {}", id);
 			throw new ResourceNotFoundException("Vendor not found with ID: " + id);
 		}
-		return vendor;
+		ContactDetails contactDetail = vendor.getContactDetails();
 
+		// Set the business card URL
+		String businessCardUrl = contactDetail.getBusinessCardUrl();
+		if (businessCardUrl != null && !businessCardUrl.isEmpty()) {
+			// Normalize the path to use forward slashes
+			String normalizedBusinessCardUrl = businessCardUrl.replace("\\", "/");
+			contactDetail.setBusinessCardUrl(baseUrl + "/images/" + normalizedBusinessCardUrl);
+		}
+
+		// Set the profile image URL
+		String profileImageUrl = contactDetail.getProfileImageUrl();
+		if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
+			// Normalize the path to use forward slashes
+			String normalizedProfileImageUrl = profileImageUrl.replace("\\", "/");
+			contactDetail.setProfileImageUrl(baseUrl + "/images/" + normalizedProfileImageUrl);
+		}
+		ProductGallary gallary = vendor.getGallery();
+		if (gallary == null) {
+			gallary = new ProductGallary();
+			vendor.setGallery(gallary);// Create an empty gallery
+		}
+		List<String> productImageUrls = gallary.getProductImage();
+	    if (productImageUrls != null) {
+	        // Normalize and update each URL in the list
+	        List<String> updatedProductImageUrls = productImageUrls.stream()
+	            .filter(url -> url != null && !url.isEmpty()) // Ensure URL is not null or empty
+	            .map(url -> {
+	                // Normalize the path to use forward slashes
+	                String normalizedUrl = url.replace("\\", "/");
+	                return baseUrl + "/images/" + normalizedUrl;
+	            })
+	            .collect(Collectors.toList());
+
+	        gallary.setProductImage(updatedProductImageUrls);
+	    }
+
+	    return vendor;
 	}
+
+
 
 	@Override
 	public Page<Vendor> findAllVendors(int page, int size) {
-		logger.debug("Fetching all vendors with page: {}, size: {}", page, size);
-		Pageable pageable = PageRequest.of(page, size);
-		List<Vendor> vendorList = vendorRepository.findAllVendors(pageable);
+	    logger.debug("Fetching all vendors with page: {}, size: {}", page, size);
+	    Pageable pageable = PageRequest.of(page, size);
+	    List<Vendor> vendorList = vendorRepository.findAllVendors(pageable);
+	    vendorList.forEach(vendor -> {
+	        ContactDetails contactDetail = vendor.getContactDetails();
+	        ProductGallary gallery = vendor.getGallery();
 
-		vendorList.forEach(vendor -> {
-			ContactDetails contactDetail = vendor.getContactDetails();
-			ProductGallary gallary = vendor.getGallery();
+	        // Process business card URL
+	        String businessCardUrl = contactDetail.getBusinessCardUrl();
+	        if (businessCardUrl != null && !businessCardUrl.isEmpty()) {
+	            String normalizedBusinessCardUrl = businessCardUrl.replace("\\", "/");
+	            contactDetail.setBusinessCardUrl(baseUrl + "/images/" + normalizedBusinessCardUrl);
+	        }
 
-			// Set the business card URL
-			String businessCardUrl = contactDetail.getBusinessCardUrl();
-			if (businessCardUrl != null && !businessCardUrl.isEmpty()) {
-				// Normalize the path to use forward slashes
-				String normalizedBusinessCardUrl = businessCardUrl.replace("\\", "/");
-				contactDetail.setBusinessCardUrl(baseUrl + "/images/" + normalizedBusinessCardUrl);
-			}
+	        // Process profile image URL
+	        String profileImageUrl = contactDetail.getProfileImageUrl();
+	        if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
+	            String normalizedProfileImageUrl = profileImageUrl.replace("\\", "/");
+	            contactDetail.setProfileImageUrl(baseUrl + "/images/" + normalizedProfileImageUrl);
+	        }
 
-			// Set the profile image URL
-			String profileImageUrl = contactDetail.getProfileImageUrl();
-			if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
-				// Normalize the path to use forward slashes
-				String normalizedProfileImageUrl = profileImageUrl.replace("\\", "/");
-				contactDetail.setProfileImageUrl(baseUrl + "/images/" + normalizedProfileImageUrl);
-			}
-		});
+	        // Process product images
+	        List<String> productImageUrls = gallery.getProductImage();
+	        if (productImageUrls != null) {
+	            List<String> updatedProductImageUrls = productImageUrls.stream()
+	                .filter(url -> url != null && !url.isEmpty()) // Ensure URL is not null or empty
+	                .map(url -> {
+	                    // Normalize the path to use forward slashes
+	                    String normalizedUrl = url.replace("\\", "/");
+	                    return baseUrl + "/images/" + normalizedUrl;
+	                })
+	                .collect(Collectors.toList());
+	            gallery.setProductImage(updatedProductImageUrls);
+	        }
+	    });
 
-		return new PageImpl<>(vendorList); // Return the updated Page<Vendor>
+	    // Return the updated Page<Vendor>
+	    return new PageImpl<>(vendorList);
 	}
+
 
 	@Override
 	public void deleteVendor(String vendorId) {
@@ -230,7 +282,7 @@ public class VendorServiceImpl implements VendorService {
 
 	@Override
 	public ResponseEntity<Resource> serveImages(String filename) {
- 		String imageUrl=imagePathPrefix + "/"+filename;
+		String imageUrl = imagePathPrefix + "/" + filename;
 		Path path = Paths.get(imageUrl);
 		Resource resource = null;
 		try {
