@@ -73,6 +73,7 @@ public class VendorServiceImpl implements VendorService {
 
 	@Override
 	public void updateFirmDetails(String vendorId, List<FirmDetail> firmDetailList) {
+		logger.debug("Updating firm details for vendor ID: {}", vendorId);
 		if (vendorId == null) {
 			throw new IllegalArgumentException("Vendor ID is missing from product gallery data");
 		}
@@ -83,11 +84,15 @@ public class VendorServiceImpl implements VendorService {
 			}
 			vendor.setFirmDetail(firmDetailList);
 			vendorRepository.save(vendor);
+		} else {
+			logger.error("Vendor not found with ID: {}", vendorId);
+			throw new ResourceNotFoundException("Vendor not found with ID: " + vendorId);
 		}
 	}
 
 	@Override
 	public void updateVendorGallery(String vendorId, String productGalleryJson, List<MultipartFile> productImages) {
+		logger.debug("Updating vendor gallery for vendor ID: {}", vendorId);
 		Gson gson = new Gson();
 		Product productGallery = null;
 		try {
@@ -118,6 +123,7 @@ public class VendorServiceImpl implements VendorService {
 
 	@Override
 	public void updateVendorBankDetails(String vendorId, List<BankDetails> bankDetails) {
+		logger.debug("Updating vendor bank details for vendor ID: {}", vendorId);
 		if (vendorId == null || bankDetails == null) {
 			throw new IllegalArgumentException("Vendor ID or bank details are missing");
 		}
@@ -133,6 +139,7 @@ public class VendorServiceImpl implements VendorService {
 
 	@Override
 	public void updateAccountDepartment(String vendorId, AccountDepartment accountDepartment) {
+		logger.debug("Updating account department for vendor ID: {}", vendorId);
 		if (vendorId == null || accountDepartment == null) {
 			throw new IllegalArgumentException("Vendor ID or account department information is missing");
 		}
@@ -147,11 +154,19 @@ public class VendorServiceImpl implements VendorService {
 
 	@Override
 	public Vendor getVendorById(String id) {
-		return vendorRepository.findById(id);
+		logger.debug("Fetching vendor by ID: {}", id);
+		Vendor vendor = vendorRepository.findById(id);
+		if (vendor == null) {
+			logger.error("Vendor not found with ID: {}", id);
+			throw new ResourceNotFoundException("Vendor not found with ID: " + id);
+		}
+		return vendor;
+
 	}
 
 	@Override
 	public Page<Vendor> findAllVendors(int page, int size) {
+		logger.debug("Fetching all vendors with page: {}, size: {}", page, size);
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Vendor> vendor = vendorRepository.findAllVendors(pageable);
 		return vendor;
@@ -159,10 +174,20 @@ public class VendorServiceImpl implements VendorService {
 
 	@Override
 	public void deleteVendor(String vendorId) {
-		 if (vendorId == null || !ObjectId.isValid(vendorId)) {
-	            throw new IllegalArgumentException("Invalid vendor ID format: " + vendorId);
-	        }
-	        Vendor vendor = vendorRepository.deleteByID(vendorId);
+		logger.debug("Deleting vendor with ID: {}", vendorId);
 
+		if (vendorId == null || !ObjectId.isValid(vendorId)) {
+			logger.error("Invalid vendor ID format: {}", vendorId);
+			throw new IllegalArgumentException("Invalid vendor ID format: " + vendorId);
+		}
+
+		Vendor vendor = vendorRepository.findById(vendorId);
+		if (vendor != null) {
+			vendorRepository.deleteByID(vendorId);
+			logger.info("Vendor deleted successfully with ID: {}", vendorId);
+		} else {
+			logger.error("Vendor not found with ID: {}", vendorId);
+			throw new ResourceNotFoundException("Vendor not found with ID: " + vendorId);
+		}
 	}
 }
