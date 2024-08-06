@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,11 +36,12 @@ public class VendorController {
 			@RequestParam(value = "businessCardUrl", required = false) MultipartFile businessCardUrl,
 			@RequestParam(value = "profileImageUrl", required = false) MultipartFile profileImageUrl) {
 		Vendor vendor = vendorService.saveVendorContactDetails(vendorRequest, businessCardUrl, profileImageUrl);
-		return new ResponseEntity<>(vendor,HttpStatus.CREATED);
+		return new ResponseEntity<>(vendor, HttpStatus.CREATED);
 	}
 
 	@PutMapping("/{vendorId}/firm-details")
-	public ResponseEntity<Void> updateFirmDetails(@PathVariable String vendorId, @RequestBody List<FirmDetail> firmDetail) {
+	public ResponseEntity<Void> updateFirmDetails(@PathVariable String vendorId,
+			@RequestBody List<FirmDetail> firmDetail) {
 		try {
 			vendorService.updateFirmDetails(vendorId, firmDetail);
 			return new ResponseEntity<>(HttpStatus.OK);
@@ -54,7 +56,7 @@ public class VendorController {
 			@RequestParam("productImages") List<MultipartFile> productImages) {
 
 		vendorService.updateVendorGallery(vendorId, productGallery, productImages);
-		return new ResponseEntity<>(HttpStatus.OK); 	
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@PutMapping("/{vendorId}/bank-details")
@@ -71,6 +73,13 @@ public class VendorController {
 
 		vendorService.updateAccountDepartment(vendorId, accountDepartment);
 		return ResponseEntity.ok("Account department updated successfully");
+	}
+
+	@DeleteMapping("/{vendorId}")
+	public ResponseEntity<HttpStatus> deleteVendor(@PathVariable String vendorId) {
+		vendorService.deleteVendor(vendorId);
+		return ResponseEntity.ok(HttpStatus.OK);
+
 	}
 
 	@GetMapping("/{id}")

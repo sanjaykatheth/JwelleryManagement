@@ -156,4 +156,13 @@ public class VendorServiceImpl implements VendorService {
 		Page<Vendor> vendor = vendorRepository.findAllVendors(pageable);
 		return vendor;
 	}
+
+	@Override
+	public void deleteVendor(String vendorId) {
+		 if (vendorId == null || !ObjectId.isValid(vendorId)) {
+	            throw new IllegalArgumentException("Invalid vendor ID format: " + vendorId);
+	        }
+	        Vendor vendor = vendorRepository.deleteByID(vendorId);
+
+	}
 }

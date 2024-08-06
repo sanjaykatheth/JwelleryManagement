@@ -27,4 +27,6 @@ public interface VendorService {
 
 	void updateFirmDetails(String vendorId, List<FirmDetail> firmDetail);
 
+	void deleteVendor(String vendorId);
+
 }

@@ -11,4 +11,6 @@ public interface VendorRepository {
 	Vendor findById(String id); // Changed to Optional<Vendor>
 
 	Page<Vendor> findAllVendors(Pageable pageable);
+
+	Vendor deleteByID(String vendorId);
 }
