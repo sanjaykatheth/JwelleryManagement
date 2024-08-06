@@ -31,7 +31,7 @@ import com.jewelleryshop.management.model.vendor.AccountDepartment;
 import com.jewelleryshop.management.model.vendor.BankDetails;
 import com.jewelleryshop.management.model.vendor.ContactDetails;
 import com.jewelleryshop.management.model.vendor.FirmDetail;
-import com.jewelleryshop.management.model.vendor.Product;
+import com.jewelleryshop.management.model.vendor.ProductGallary;
 import com.jewelleryshop.management.model.vendor.Vendor;
 import com.jewelleryshop.management.repo.VendorRepository;
 import com.jewelleryshop.management.service.VendorService;
@@ -109,9 +109,9 @@ public class VendorServiceImpl implements VendorService {
 	public void updateVendorGallery(String vendorId, String productGalleryJson, List<MultipartFile> productImages) {
 		logger.debug("Updating vendor gallery for vendor ID: {}", vendorId);
 		Gson gson = new Gson();
-		Product productGallery = null;
+		ProductGallary productGallery = null;
 		try {
-			productGallery = gson.fromJson(productGalleryJson, Product.class);
+			productGallery = gson.fromJson(productGalleryJson, ProductGallary.class);
 		} catch (JsonSyntaxException e) {
 			e.printStackTrace();
 
@@ -187,6 +187,7 @@ public class VendorServiceImpl implements VendorService {
 
 		vendorList.forEach(vendor -> {
 			ContactDetails contactDetail = vendor.getContactDetails();
+			ProductGallary gallary = vendor.getGallery();
 
 			// Set the business card URL
 			String businessCardUrl = contactDetail.getBusinessCardUrl();

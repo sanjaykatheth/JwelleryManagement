@@ -6,7 +6,7 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class Product {
+public class ProductGallary {
 
 	private List<String> productImage;
 	private String deal;

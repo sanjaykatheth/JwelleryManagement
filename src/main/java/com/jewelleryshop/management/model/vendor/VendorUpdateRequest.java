@@ -16,6 +16,6 @@ public class VendorUpdateRequest {
 	private List<BankDetails> bankDetailList;
 	private AccountDepartment accountDepartment;
 	private PaymentTerms paymentTerms;
-	private List<Product> gallery;
+	private List<ProductGallary> gallery;
 	private VendorStage stage;
 }

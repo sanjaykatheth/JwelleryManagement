@@ -21,6 +21,6 @@ public class Vendor {
 	private List<FirmDetail> firmDetail;
 	private List<BankDetails> bankDetailList;
 	private AccountDepartment accountDepartment;
-	private Product gallery;
+	private ProductGallary gallery;
 
 }
