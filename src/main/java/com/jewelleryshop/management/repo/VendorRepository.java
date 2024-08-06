@@ -2,6 +2,7 @@ package com.jewelleryshop.management.repo;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.jewelleryshop.management.model.vendor.SearchVendorRequest;
@@ -16,5 +17,5 @@ public interface VendorRepository {
 
 	Vendor deleteByID(String vendorId);
 
-	List<Vendor> searchVendor(SearchVendorRequest vendorSearchRequest);
+	Page<Vendor> searchVendor(SearchVendorRequest vendorSearchRequest, Pageable pageable);
 }

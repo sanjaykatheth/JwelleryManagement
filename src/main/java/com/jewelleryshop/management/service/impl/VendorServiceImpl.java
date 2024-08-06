@@ -294,8 +294,10 @@ public class VendorServiceImpl implements VendorService {
 	}
 
 	@Override
-	public List<Vendor> searchVendor(SearchVendorRequest vendorSearchRequest) {
-		 vendorRepository.searchVendor(vendorSearchRequest);
-		return null;
+	public Page<Vendor> searchVendor(SearchVendorRequest vendorSearchRequest,int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
+	    return  vendorRepository.searchVendor(vendorSearchRequest,pageable);
+		
+		  
 	}
 }

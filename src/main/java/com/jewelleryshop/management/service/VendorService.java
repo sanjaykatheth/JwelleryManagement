@@ -34,6 +34,6 @@ public interface VendorService {
 
 	ResponseEntity<Resource> serveImages(String filenames);
 
-	List<Vendor> searchVendor(SearchVendorRequest vendorSearchRequest);
+	Page<Vendor> searchVendor(SearchVendorRequest vendorSearchRequest, int page, int size);
 
 }

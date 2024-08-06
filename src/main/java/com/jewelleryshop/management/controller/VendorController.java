@@ -106,9 +106,10 @@ public class VendorController {
 		return vendorService.serveImages(filename);
 
 	}
-	@GetMapping("/search")
-	public List<Vendor> searchVendor(@RequestBody SearchVendorRequest vendorSearchRequest) throws Exception {
-		return vendorService.searchVendor(vendorSearchRequest);
+	@PostMapping("/search")
+	public Page<Vendor> searchVendor(@RequestBody SearchVendorRequest vendorSearchRequest, @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) throws Exception {
+		return vendorService.searchVendor(vendorSearchRequest,page, size);
 
 	}
 }
