@@ -23,6 +23,7 @@ import com.jewelleryshop.management.exception.ResourceNotFoundException;
 import com.jewelleryshop.management.model.vendor.AccountDepartment;
 import com.jewelleryshop.management.model.vendor.BankDetails;
 import com.jewelleryshop.management.model.vendor.FirmDetail;
+import com.jewelleryshop.management.model.vendor.SearchVendorRequest;
 import com.jewelleryshop.management.model.vendor.Vendor;
 import com.jewelleryshop.management.service.VendorService;
 
@@ -103,6 +104,11 @@ public class VendorController {
 	@GetMapping("/images/{filename}")
 	public ResponseEntity<Resource> getImages(@PathVariable String filename) throws Exception {
 		return vendorService.serveImages(filename);
+
+	}
+	@GetMapping("/search")
+	public List<Vendor> searchVendor(@RequestBody SearchVendorRequest vendorSearchRequest) throws Exception {
+		return vendorService.searchVendor(vendorSearchRequest);
 
 	}
 }

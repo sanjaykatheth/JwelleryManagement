@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.jewelleryshop.management.model.vendor.AccountDepartment;
 import com.jewelleryshop.management.model.vendor.BankDetails;
 import com.jewelleryshop.management.model.vendor.FirmDetail;
+import com.jewelleryshop.management.model.vendor.SearchVendorRequest;
 import com.jewelleryshop.management.model.vendor.Vendor;
 
 public interface VendorService {
@@ -32,5 +33,7 @@ public interface VendorService {
 	void deleteVendor(String vendorId);
 
 	ResponseEntity<Resource> serveImages(String filenames);
+
+	List<Vendor> searchVendor(SearchVendorRequest vendorSearchRequest);
 
 }

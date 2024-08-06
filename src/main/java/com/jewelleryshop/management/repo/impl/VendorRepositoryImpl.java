@@ -6,8 +6,6 @@ import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -15,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import com.jewelleryshop.management.exception.VendorNotFoundException;
+import com.jewelleryshop.management.model.vendor.SearchVendorRequest;
 import com.jewelleryshop.management.model.vendor.Vendor;
 import com.jewelleryshop.management.repo.VendorRepository;
 import com.jewelleryshop.management.service.impl.VendorServiceImpl;
@@ -53,18 +52,33 @@ public class VendorRepositoryImpl implements VendorRepository {
 	}
 
 	@Override
-    public Vendor deleteByID(String vendorId) {
-        if (vendorId == null || !ObjectId.isValid(vendorId)) {
-            throw new IllegalArgumentException("Invalid vendor ID format: " + vendorId);
-        }
+	public Vendor deleteByID(String vendorId) {
+		if (vendorId == null || !ObjectId.isValid(vendorId)) {
+			throw new IllegalArgumentException("Invalid vendor ID format: " + vendorId);
+		}
 
-        Query query = new Query(Criteria.where("_id").is(new ObjectId(vendorId)));
-        Vendor vendor = mongoTemplate.findAndRemove(query, Vendor.class);
+		Query query = new Query(Criteria.where("_id").is(new ObjectId(vendorId)));
+		Vendor vendor = mongoTemplate.findAndRemove(query, Vendor.class);
 
-        if (vendor == null) {
-            throw new VendorNotFoundException("Vendor not found with ID: " + vendorId);
-        }
+		if (vendor == null) {
+			throw new VendorNotFoundException("Vendor not found with ID: " + vendorId);
+		}
 
-        return vendor;
-    }
+		return vendor;
+	}
+
+	@Override
+	public List<Vendor> searchVendor(SearchVendorRequest vendorSearchRequest) {
+		Criteria criteria = new Criteria();
+
+		// Get the search key and value from the request
+		String name = vendorSearchRequest.getName();
+
+		if (name != null && !name.isEmpty()) {
+			Criteria nameCriteria = Criteria.where("contactDetails.name").regex(".*" + name + ".*", "i");
+			criteria.andOperator(nameCriteria);
+		}
+		Query query = new Query(criteria);
+		return mongoTemplate.find(query, Vendor.class);
+	}
 }

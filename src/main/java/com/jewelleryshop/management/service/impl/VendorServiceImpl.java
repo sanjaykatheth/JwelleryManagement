@@ -33,6 +33,7 @@ import com.jewelleryshop.management.model.vendor.BankDetails;
 import com.jewelleryshop.management.model.vendor.ContactDetails;
 import com.jewelleryshop.management.model.vendor.FirmDetail;
 import com.jewelleryshop.management.model.vendor.ProductGallary;
+import com.jewelleryshop.management.model.vendor.SearchVendorRequest;
 import com.jewelleryshop.management.model.vendor.Vendor;
 import com.jewelleryshop.management.repo.VendorRepository;
 import com.jewelleryshop.management.service.VendorService;
@@ -225,16 +226,12 @@ public class VendorServiceImpl implements VendorService {
 	    List<Vendor> vendorList = vendorRepository.findAllVendors(pageable);
 	    vendorList.forEach(vendor -> {
 	        ContactDetails contactDetail = vendor.getContactDetails();
-	      
-
-	        // Process business card URL
-	        String businessCardUrl = contactDetail.getBusinessCardUrl();
+	         String businessCardUrl = contactDetail.getBusinessCardUrl();
 	        if (businessCardUrl != null && !businessCardUrl.isEmpty()) {
 	            String normalizedBusinessCardUrl = businessCardUrl.replace("\\", "/");
 	            contactDetail.setBusinessCardUrl(baseUrl + "/images/" + normalizedBusinessCardUrl);
 	        }
 
-	        // Process profile image URL
 	        String profileImageUrl = contactDetail.getProfileImageUrl();
 	        if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
 	            String normalizedProfileImageUrl = profileImageUrl.replace("\\", "/");
@@ -242,16 +239,14 @@ public class VendorServiceImpl implements VendorService {
 	        }
 	        ProductGallary gallery = vendor.getGallery();
 	        if (gallery == null) {
-	            gallery = new ProductGallary(); // Create an empty gallery
-	            vendor.setGallery(gallery); // Ensure the gallery is set in the vendor
+	            gallery = new ProductGallary(); 
+	            vendor.setGallery(gallery); 
 	        }
-	        // Process product images
 	        List<String> productImageUrls = gallery.getProductImage();
 	        if (productImageUrls != null) {
 	            List<String> updatedProductImageUrls = productImageUrls.stream()
 	                .filter(url -> url != null && !url.isEmpty()) // Ensure URL is not null or empty
 	                .map(url -> {
-	                    // Normalize the path to use forward slashes
 	                    String normalizedUrl = url.replace("\\", "/");
 	                    return baseUrl + "/images/" + normalizedUrl;
 	                })
@@ -260,7 +255,6 @@ public class VendorServiceImpl implements VendorService {
 	        }
 	    });
 
-	    // Return the updated Page<Vendor>
 	    return new PageImpl<>(vendorList);
 	}
 
@@ -297,5 +291,11 @@ public class VendorServiceImpl implements VendorService {
 
 		return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(resource);
 
+	}
+
+	@Override
+	public List<Vendor> searchVendor(SearchVendorRequest vendorSearchRequest) {
+		 vendorRepository.searchVendor(vendorSearchRequest);
+		return null;
 	}
 }
