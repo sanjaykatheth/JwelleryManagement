@@ -15,7 +15,6 @@ public class VendorUpdateRequest {
 	private FirmDetail firmDetail;
 	private List<BankDetails> bankDetailList;
 	private AccountDepartment accountDepartment;
-	private PaymentTerms paymentTerms;
 	private List<ProductGallary> gallery;
 	private VendorStage stage;
 }

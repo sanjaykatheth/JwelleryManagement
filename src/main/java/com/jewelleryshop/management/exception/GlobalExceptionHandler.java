@@ -1,5 +1,7 @@
 package com.jewelleryshop.management.exception;
 
+import java.io.FileNotFoundException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -25,9 +27,17 @@ public class GlobalExceptionHandler {
 	}
 
 	@ExceptionHandler(MissingServletRequestPartException.class)
-	public ResponseEntity<ExceptionHandlingResponse> handleMissingServletRequestPartException(MissingServletRequestPartException ex) {
+	public ResponseEntity<ExceptionHandlingResponse> handleMissingServletRequestPartException(
+			MissingServletRequestPartException ex) {
 		logger.error("Missing part in request", ex);
 		ExceptionHandlingResponse errorResponse = new ExceptionHandlingResponse(ex.getMessage());
-		return new ResponseEntity<>(errorResponse , HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(FileNotFoundException.class)
+	public ResponseEntity<ExceptionHandlingResponse> handleRuntimeException(RuntimeException ex) {
+		logger.error("An error occurred: ", ex);
+		ExceptionHandlingResponse errorResponse = new ExceptionHandlingResponse(ex.getMessage());
+		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
 	}
 }

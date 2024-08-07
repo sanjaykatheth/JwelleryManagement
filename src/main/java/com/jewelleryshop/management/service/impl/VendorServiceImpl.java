@@ -96,10 +96,14 @@ public class VendorServiceImpl implements VendorService {
 		}
 		Vendor vendor = vendorRepository.findById(vendorId);
 		if (vendor != null) {
+			List<FirmDetail> existingFirmDetails = vendor.getFirmDetail() != null ? vendor.getFirmDetail()
+					: new ArrayList<>();
+			existingFirmDetails.addAll(firmDetailList);
+
 			for (FirmDetail firmDetail : firmDetailList) {
 				firmDetail.setId(new ObjectId().toString());
 			}
-			vendor.setFirmDetail(firmDetailList);
+			vendor.setFirmDetail(existingFirmDetails);
 			vendorRepository.save(vendor);
 		} else {
 			logger.error("Vendor not found with ID: {}", vendorId);
@@ -147,11 +151,11 @@ public class VendorServiceImpl implements VendorService {
 
 		Vendor vendor = vendorRepository.findById(vendorId);
 		if (vendor != null) {
-			for (BankDetails bankDetail: bankDetails) {
+			for (BankDetails bankDetail : bankDetails) {
 				bankDetail.validateAccountNumbers();
 				bankDetail.setId(new ObjectId().toString());
 			}
-		
+
 			vendor.setBankDetailList(bankDetails);
 			vendorRepository.save(vendor);
 		} else {
@@ -166,7 +170,7 @@ public class VendorServiceImpl implements VendorService {
 			throw new IllegalArgumentException("Vendor ID or account department information is missing");
 		}
 		Vendor vendor = vendorRepository.findById(vendorId);
-		
+
 		if (vendor != null) {
 			accountDepartment.setId(new ObjectId().toString());
 			vendor.setAccountDepartment(accountDepartment);
@@ -207,64 +211,59 @@ public class VendorServiceImpl implements VendorService {
 			vendor.setGallery(gallary);// Create an empty gallery
 		}
 		List<String> productImageUrls = gallary.getProductImage();
-	    if (productImageUrls != null) {
-	        // Normalize and update each URL in the list
-	        List<String> updatedProductImageUrls = productImageUrls.stream()
-	            .filter(url -> url != null && !url.isEmpty()) // Ensure URL is not null or empty
-	            .map(url -> {
-	                // Normalize the path to use forward slashes
-	                String normalizedUrl = url.replace("\\", "/");
-	                return baseUrl + "/images/" + normalizedUrl;
-	            })
-	            .collect(Collectors.toList());
+		if (productImageUrls != null) {
+			// Normalize and update each URL in the list
+			List<String> updatedProductImageUrls = productImageUrls.stream()
+					.filter(url -> url != null && !url.isEmpty()) // Ensure URL is not null or empty
+					.map(url -> {
+						// Normalize the path to use forward slashes
+						String normalizedUrl = url.replace("\\", "/");
+						return baseUrl + "/images/" + normalizedUrl;
+					}).collect(Collectors.toList());
 
-	        gallary.setProductImage(updatedProductImageUrls);
-	    }
+			gallary.setProductImage(updatedProductImageUrls);
+		}
 
-	    return vendor;
+		return vendor;
 	}
-
-
 
 	@Override
 	public Page<Vendor> findAllVendors(int page, int size) {
-	    logger.debug("Fetching all vendors with page: {}, size: {}", page, size);
-	    Pageable pageable = PageRequest.of(page, size);
-	    List<Vendor> vendorList = vendorRepository.findAllVendors(pageable);
-	    vendorList.forEach(vendor -> {
-	        ContactDetails contactDetail = vendor.getContactDetails();
-	         String businessCardUrl = contactDetail.getBusinessCardUrl();
-	        if (businessCardUrl != null && !businessCardUrl.isEmpty()) {
-	            String normalizedBusinessCardUrl = businessCardUrl.replace("\\", "/");
-	            contactDetail.setBusinessCardUrl(baseUrl + "/images/" + normalizedBusinessCardUrl);
-	        }
+		logger.debug("Fetching all vendors with page: {}, size: {}", page, size);
+		Pageable pageable = PageRequest.of(page, size);
+		List<Vendor> vendorList = vendorRepository.findAllVendors(pageable);
+		vendorList.forEach(vendor -> {
+			ContactDetails contactDetail = vendor.getContactDetails();
+			String businessCardUrl = contactDetail.getBusinessCardUrl();
+			if (businessCardUrl != null && !businessCardUrl.isEmpty()) {
+				String normalizedBusinessCardUrl = businessCardUrl.replace("\\", "/");
+				contactDetail.setBusinessCardUrl(baseUrl + "/images/" + normalizedBusinessCardUrl);
+			}
 
-	        String profileImageUrl = contactDetail.getProfileImageUrl();
-	        if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
-	            String normalizedProfileImageUrl = profileImageUrl.replace("\\", "/");
-	            contactDetail.setProfileImageUrl(baseUrl + "/images/" + normalizedProfileImageUrl);
-	        }
-	        ProductGallary gallery = vendor.getGallery();
-	        if (gallery == null) {
-	            gallery = new ProductGallary(); 
-	            vendor.setGallery(gallery); 
-	        }
-	        List<String> productImageUrls = gallery.getProductImage();
-	        if (productImageUrls != null) {
-	            List<String> updatedProductImageUrls = productImageUrls.stream()
-	                .filter(url -> url != null && !url.isEmpty()) // Ensure URL is not null or empty
-	                .map(url -> {
-	                    String normalizedUrl = url.replace("\\", "/");
-	                    return baseUrl + "/images/" + normalizedUrl;
-	                })
-	                .collect(Collectors.toList());
-	            gallery.setProductImage(updatedProductImageUrls);
-	        }
-	    });
+			String profileImageUrl = contactDetail.getProfileImageUrl();
+			if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
+				String normalizedProfileImageUrl = profileImageUrl.replace("\\", "/");
+				contactDetail.setProfileImageUrl(baseUrl + "/images/" + normalizedProfileImageUrl);
+			}
+			ProductGallary gallery = vendor.getGallery();
+			if (gallery == null) {
+				gallery = new ProductGallary();
+				vendor.setGallery(gallery);
+			}
+			List<String> productImageUrls = gallery.getProductImage();
+			if (productImageUrls != null) {
+				List<String> updatedProductImageUrls = productImageUrls.stream()
+						.filter(url -> url != null && !url.isEmpty()) // Ensure URL is not null or empty
+						.map(url -> {
+							String normalizedUrl = url.replace("\\", "/");
+							return baseUrl + "/images/" + normalizedUrl;
+						}).collect(Collectors.toList());
+				gallery.setProductImage(updatedProductImageUrls);
+			}
+		});
 
-	    return new PageImpl<>(vendorList);
+		return new PageImpl<>(vendorList);
 	}
-
 
 	@Override
 	public void deleteVendor(String vendorId) {
@@ -301,10 +300,9 @@ public class VendorServiceImpl implements VendorService {
 	}
 
 	@Override
-	public Page<Vendor> searchVendor(SearchVendorRequest vendorSearchRequest,int page, int size) {
+	public Page<Vendor> searchVendor(SearchVendorRequest vendorSearchRequest, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
-	    return  vendorRepository.searchVendor(vendorSearchRequest,pageable);
-		
-		  
+		return vendorRepository.searchVendor(vendorSearchRequest, pageable);
+
 	}
 }

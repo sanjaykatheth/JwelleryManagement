@@ -7,7 +7,6 @@ import com.jewelleryshop.management.model.vendor.BankDetails;
 import com.jewelleryshop.management.model.vendor.ContactDetails;
 import com.jewelleryshop.management.model.vendor.DealerInfo;
 import com.jewelleryshop.management.model.vendor.FirmDetail;
-import com.jewelleryshop.management.model.vendor.PaymentTerms;
 
 import lombok.Data;
 
@@ -18,6 +17,5 @@ public class UpdateVendorRequest {
     private List<DealerInfo> dealerInfoList; // Example of another field
     private List<BankDetails> bankDetailList; // Example of another field
     private AccountDepartment accountDepartment; // Example of another field
-    private PaymentTerms paymentTerms; // Example of another field
-
+	
 }
