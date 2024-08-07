@@ -27,6 +27,8 @@ import com.jewelleryshop.management.model.vendor.SearchVendorRequest;
 import com.jewelleryshop.management.model.vendor.Vendor;
 import com.jewelleryshop.management.service.VendorService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/vendors")
 public class VendorController {
@@ -63,7 +65,7 @@ public class VendorController {
 	}
 
 	@PutMapping("/{vendorId}/bank-details")
-	public ResponseEntity<Void> updateBankDetails(@PathVariable("vendorId") String vendorId,
+	public ResponseEntity<Void> updateBankDetails(@Valid @PathVariable("vendorId") String vendorId,
 			@RequestBody List<BankDetails> bankDetails) {
 		vendorService.updateVendorBankDetails(vendorId, bankDetails);
 		return new ResponseEntity<>(HttpStatus.OK);

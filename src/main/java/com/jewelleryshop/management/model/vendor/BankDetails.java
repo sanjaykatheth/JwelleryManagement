@@ -20,11 +20,15 @@ public class BankDetails {
 	@NotNull(message = "Repeated account number cannot be null")
 	@Size(min = 6, max = 20, message = "Repeated account number must be between 6 and 20 characters")
 	private String repeatedAccountNumber;
-	
+
+	@NotNull(message = "Account holder name cannot be null")
+	@Size(min = 1, max = 100, message = "Account holder name must be between 1 and 100 characters")
+	private String accountHolderName;
+
 	public void validateAccountNumbers() {
-        if (!accountNumber.equals(repeatedAccountNumber)) {
-            throw new IllegalArgumentException("Account number and repeated account number do not match");
-        }
-    }
+		if (!accountNumber.equals(repeatedAccountNumber)) {
+			throw new IllegalArgumentException("Account number and repeated account number do not match");
+		}
+	}
 
 }
