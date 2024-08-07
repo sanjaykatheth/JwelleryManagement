@@ -1,6 +1,7 @@
 package com.jewelleryshop.management.model.vendor;
 
 
+import java.util.Date;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -17,5 +18,6 @@ public class ProductGallary {
 	private float rate;
 	private String quality;
 	private String desc;
+	private Date date;
 
 }

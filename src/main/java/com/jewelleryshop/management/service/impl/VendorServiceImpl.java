@@ -147,6 +147,11 @@ public class VendorServiceImpl implements VendorService {
 
 		Vendor vendor = vendorRepository.findById(vendorId);
 		if (vendor != null) {
+			for (BankDetails bankDetail: bankDetails) {
+				bankDetail.validateAccountNumbers();
+				bankDetail.setId(new ObjectId().toString());
+			}
+		
 			vendor.setBankDetailList(bankDetails);
 			vendorRepository.save(vendor);
 		} else {
@@ -161,7 +166,9 @@ public class VendorServiceImpl implements VendorService {
 			throw new IllegalArgumentException("Vendor ID or account department information is missing");
 		}
 		Vendor vendor = vendorRepository.findById(vendorId);
+		
 		if (vendor != null) {
+			accountDepartment.setId(new ObjectId().toString());
 			vendor.setAccountDepartment(accountDepartment);
 			vendorRepository.save(vendor);
 		} else {
