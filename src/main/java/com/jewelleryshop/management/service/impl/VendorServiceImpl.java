@@ -193,7 +193,7 @@ public class VendorServiceImpl implements VendorService {
 				existingBankDetails.add(bankDetail); // Add new bank detail to the existing list
 			}
 
-			vendor.setBankDetailList(bankDetails);
+			vendor.setBankDetailList(existingBankDetails);
 			vendorRepository.save(vendor);
 		} else {
 			throw new ResourceNotFoundException("Vendor not found with ID: " + vendorId);
