@@ -28,6 +28,10 @@ import com.jewelleryshop.management.model.vendor.SearchVendorRequest;
 import com.jewelleryshop.management.model.vendor.Vendor;
 import com.jewelleryshop.management.service.VendorService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 
 @RestController
@@ -37,20 +41,30 @@ public class VendorController {
 	@Autowired
 	private VendorService vendorService;
 
+	@Operation(summary = "Create a new vendor", description = "Creates a new vendor with the provided details", responses = {
+			@ApiResponse(responseCode = "201", description = "Vendor created successfully", content = @Content(schema = @Schema(implementation = Vendor.class))),
+			@ApiResponse(responseCode = "400", description = "Invalid input") })
 	@PostMapping("/create")
 	public ResponseEntity<Vendor> createVendor(@RequestBody CreatVendorRequest creatVendorRequest) {
 		Vendor vendor = vendorService.saveVendorFirmInfo(creatVendorRequest);
 		return new ResponseEntity<>(vendor, HttpStatus.CREATED);
 	}
-	
+
+	@Operation(summary = "Update the vendor's contact details", description = "Updates the contact details of an existing vendor", responses = {
+			@ApiResponse(responseCode = "200", description = "Contact details updated successfully"),
+			@ApiResponse(responseCode = "404", description = "Vendor not found") })
 	@PutMapping("/{vendorId}/contact-details")
-	public ResponseEntity<Void> updateVendorContactDetails(@PathVariable String vendorId,@RequestParam("updateContact") String updateContact,
+	public ResponseEntity<Void> updateVendorContactDetails(@PathVariable String vendorId,
+			@RequestParam("updateContact") String updateContact,
 			@RequestParam(value = "businessCardUrl", required = false) MultipartFile businessCardUrl,
 			@RequestParam(value = "profileImageUrl", required = false) MultipartFile profileImageUrl) {
-		vendorService.saveVendorContactDetails(vendorId,updateContact, businessCardUrl, profileImageUrl);
+		vendorService.saveVendorContactDetails(vendorId, updateContact, businessCardUrl, profileImageUrl);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	@Operation(summary = "Update vendor firm details", description = "Updates the firm details of an existing vendor", responses = {
+			@ApiResponse(responseCode = "200", description = "Firm details updated successfully"),
+			@ApiResponse(responseCode = "404", description = "Vendor not found") })
 	@PutMapping("/{vendorId}/firm-details")
 	public ResponseEntity<Void> updateVendorFirmDetails(@PathVariable String vendorId,
 			@RequestBody FirmDetail firmDetail) {
@@ -58,10 +72,13 @@ public class VendorController {
 			vendorService.updateFirmDetails(vendorId, firmDetail);
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (ResourceNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND); 
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
+	@Operation(summary = "Update vendor gallery", description = "Updates the product gallery of an existing vendor", responses = {
+			@ApiResponse(responseCode = "200", description = "Gallery updated successfully"),
+			@ApiResponse(responseCode = "404", description = "Vendor not found") })
 	@PutMapping("/{vendorId}/gallery")
 	public ResponseEntity<Void> updateVendorGallery(@PathVariable("vendorId") String vendorId,
 			@RequestPart("productGallery") String productGallery,
@@ -71,6 +88,9 @@ public class VendorController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	@Operation(summary = "Update vendor bank details", description = "Updates the bank details of an existing vendor", responses = {
+			@ApiResponse(responseCode = "200", description = "Bank details updated successfully"),
+			@ApiResponse(responseCode = "404", description = "Vendor not found") })
 	@PutMapping("/{vendorId}/bank-details")
 	public ResponseEntity<Void> updateVendorBankDetails(@Valid @PathVariable("vendorId") String vendorId,
 			@RequestBody List<BankDetails> bankDetails) {
@@ -79,6 +99,9 @@ public class VendorController {
 
 	}
 
+	@Operation(summary = "Update vendor account department", description = "Updates the account department details of an existing vendor", responses = {
+			@ApiResponse(responseCode = "200", description = "Account department updated successfully"),
+			@ApiResponse(responseCode = "404", description = "Vendor not found") })
 	@PutMapping("/{vendorId}/account-department")
 	public ResponseEntity<Void> updateVendorAccountDepartment(@PathVariable("vendorId") String vendorId,
 			@RequestBody AccountDepartment accountDepartment) {
@@ -87,6 +110,9 @@ public class VendorController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	@Operation(summary = "Delete a vendor", description = "Deletes an existing vendor", responses = {
+			@ApiResponse(responseCode = "200", description = "Vendor deleted successfully"),
+			@ApiResponse(responseCode = "404", description = "Vendor not found") })
 	@DeleteMapping("/{vendorId}")
 	public ResponseEntity<HttpStatus> deleteVendor(@PathVariable String vendorId) {
 		vendorService.deleteVendor(vendorId);
@@ -94,6 +120,9 @@ public class VendorController {
 
 	}
 
+	@Operation(summary = "Get vendor by ID", description = "Retrieves a vendor by its ID", responses = {
+			@ApiResponse(responseCode = "200", description = "Vendor retrieved successfully", content = @Content(schema = @Schema(implementation = Vendor.class))),
+			@ApiResponse(responseCode = "404", description = "Vendor not found") })
 	@GetMapping("/{id}")
 	public ResponseEntity<Vendor> getVendor(@PathVariable String id) {
 		Vendor vendor = vendorService.getVendorById(id);
@@ -104,6 +133,8 @@ public class VendorController {
 		}
 	}
 
+	@Operation(summary = "Get all vendors", description = "Retrieves a paginated list of all vendors", responses = {
+			@ApiResponse(responseCode = "200", description = "List of vendors retrieved successfully", content = @Content(schema = @Schema(implementation = Vendor.class))), })
 	@GetMapping
 	public Page<Vendor> getAllVendors(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {
@@ -115,10 +146,11 @@ public class VendorController {
 		return vendorService.serveImages(filename);
 
 	}
+
 	@PostMapping("/search")
-	public Page<Vendor> searchVendor(@RequestBody SearchVendorRequest vendorSearchRequest, @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) throws Exception {
-		return vendorService.searchVendor(vendorSearchRequest,page, size);
+	public Page<Vendor> searchVendor(@RequestBody SearchVendorRequest vendorSearchRequest,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) throws Exception {
+		return vendorService.searchVendor(vendorSearchRequest, page, size);
 
 	}
 }
