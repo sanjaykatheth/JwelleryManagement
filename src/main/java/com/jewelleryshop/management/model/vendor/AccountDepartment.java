@@ -1,6 +1,6 @@
 package com.jewelleryshop.management.model.vendor;
 
-import org.springframework.data.annotation.Id;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,11 +10,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccountDepartment {
-	@Id
+
 	private String id;
 	private String pendingOrderValue;
 	private String readyOrderValue;
-	private OpeningBalance openingBalance;
-	private CurrentBalance currentBalancel;
-	private TotalPurchaseTillDate totalPurchaseTillDate;
+	private List<OpeningBalance> openingBalance;
+	private List<CurrentBalance> currentBalance;
+	private List<TotalPurchaseTillDate> totalPurchaseTillDate;
 }

@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.jewelleryshop.management.model.vendor.AccountDepartment;
 import com.jewelleryshop.management.model.vendor.BankDetails;
+import com.jewelleryshop.management.model.vendor.CreatVendorRequest;
 import com.jewelleryshop.management.model.vendor.FirmDetail;
 import com.jewelleryshop.management.model.vendor.SearchVendorRequest;
 import com.jewelleryshop.management.model.vendor.Vendor;
@@ -21,8 +22,7 @@ public interface VendorService {
 
 	void updateVendorGallery(String vendorId, String productGalleryJson2, List<MultipartFile> productImages);
 
-	Vendor saveVendorContactDetails(String vendorRequestString, MultipartFile businessCardUrl,
-			MultipartFile profileImageUrl);
+	
 
 	void updateVendorBankDetails(String vendorId, List<BankDetails> bankDetails);
 
@@ -35,5 +35,12 @@ public interface VendorService {
 	ResponseEntity<Resource> serveImages(String filenames);
 
 	Page<Vendor> searchVendor(SearchVendorRequest vendorSearchRequest, int page, int size);
+
+	void saveVendorContactDetails(String vendorId, String vendorRequest, MultipartFile businessCardUrl,
+			MultipartFile profileImageUrl);
+
+	void updateFirmDetails(String vendorId, FirmDetail firmDetail);
+
+	Vendor saveVendorFirmInfo(CreatVendorRequest creatVendorRequest);
 
 }

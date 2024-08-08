@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.jewelleryshop.management.exception.ResourceNotFoundException;
 import com.jewelleryshop.management.model.vendor.AccountDepartment;
 import com.jewelleryshop.management.model.vendor.BankDetails;
+import com.jewelleryshop.management.model.vendor.CreatVendorRequest;
 import com.jewelleryshop.management.model.vendor.FirmDetail;
 import com.jewelleryshop.management.model.vendor.SearchVendorRequest;
 import com.jewelleryshop.management.model.vendor.Vendor;
@@ -36,27 +37,33 @@ public class VendorController {
 	@Autowired
 	private VendorService vendorService;
 
-	@PostMapping
-	public ResponseEntity<Vendor> createVendor(@RequestParam("vendorRequest") String vendorRequest,
+	@PostMapping("/create")
+	public ResponseEntity<Vendor> createVendor(@RequestBody CreatVendorRequest creatVendorRequest) {
+		Vendor vendor = vendorService.saveVendorFirmInfo(creatVendorRequest);
+		return new ResponseEntity<>(vendor, HttpStatus.CREATED);
+	}
+	
+	@PutMapping("/{vendorId}/contact-details")
+	public ResponseEntity<Void> updateVendorContactDetails(@PathVariable String vendorId,@RequestParam("updateContact") String updateContact,
 			@RequestParam(value = "businessCardUrl", required = false) MultipartFile businessCardUrl,
 			@RequestParam(value = "profileImageUrl", required = false) MultipartFile profileImageUrl) {
-		Vendor vendor = vendorService.saveVendorContactDetails(vendorRequest, businessCardUrl, profileImageUrl);
-		return new ResponseEntity<>(vendor, HttpStatus.CREATED);
+		vendorService.saveVendorContactDetails(vendorId,updateContact, businessCardUrl, profileImageUrl);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@PutMapping("/{vendorId}/firm-details")
-	public ResponseEntity<Void> updateFirmDetails(@PathVariable String vendorId,
-			@RequestBody List<FirmDetail> firmDetail) {
+	public ResponseEntity<Void> updateVendorFirmDetails(@PathVariable String vendorId,
+			@RequestBody FirmDetail firmDetail) {
 		try {
 			vendorService.updateFirmDetails(vendorId, firmDetail);
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (ResourceNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Resource not found
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND); 
 		}
 	}
 
 	@PutMapping("/{vendorId}/gallery")
-	public ResponseEntity<Void> updateGallery(@PathVariable("vendorId") String vendorId,
+	public ResponseEntity<Void> updateVendorGallery(@PathVariable("vendorId") String vendorId,
 			@RequestPart("productGallery") String productGallery,
 			@RequestPart("productImages") List<MultipartFile> productImages) {
 
@@ -65,7 +72,7 @@ public class VendorController {
 	}
 
 	@PutMapping("/{vendorId}/bank-details")
-	public ResponseEntity<Void> updateBankDetails(@Valid @PathVariable("vendorId") String vendorId,
+	public ResponseEntity<Void> updateVendorBankDetails(@Valid @PathVariable("vendorId") String vendorId,
 			@RequestBody List<BankDetails> bankDetails) {
 		vendorService.updateVendorBankDetails(vendorId, bankDetails);
 		return new ResponseEntity<>(HttpStatus.OK);
@@ -73,11 +80,11 @@ public class VendorController {
 	}
 
 	@PutMapping("/{vendorId}/account-department")
-	public ResponseEntity<String> updateAccountDepartment(@PathVariable("vendorId") String vendorId,
+	public ResponseEntity<Void> updateVendorAccountDepartment(@PathVariable("vendorId") String vendorId,
 			@RequestBody AccountDepartment accountDepartment) {
 
 		vendorService.updateAccountDepartment(vendorId, accountDepartment);
-		return ResponseEntity.ok("Account department updated successfully");
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@DeleteMapping("/{vendorId}")

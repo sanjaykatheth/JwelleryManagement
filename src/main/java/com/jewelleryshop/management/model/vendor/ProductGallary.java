@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProductGallary {
 
+	private String id;
 	private List<String> productImage;
 	private String deal;
 	private float rate;

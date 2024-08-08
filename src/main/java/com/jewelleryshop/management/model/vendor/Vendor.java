@@ -16,11 +16,13 @@ import lombok.NoArgsConstructor;
 public class Vendor {
 	@Id
 	private String id;
-	private ContactDetails contactDetails;
-	private List<DealerInfo> details;
-	private List<FirmDetail> firmDetail;
+	private String firmName;
+	private String firmType;
+	private CreatVendorRequest createVendor;
+ 	private List<ContactDetails> contactDetails;
+	private FirmDetail firmDetail;
 	private List<BankDetails> bankDetailList;
 	private AccountDepartment accountDepartment;
-	private ProductGallary gallery;
+	private List<ProductGallary> gallery;
 
 }

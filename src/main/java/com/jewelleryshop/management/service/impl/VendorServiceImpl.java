@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.coyote.BadRequestException;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +28,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import com.jewelleryshop.management.exception.ResourceNotFoundException;
 import com.jewelleryshop.management.model.vendor.AccountDepartment;
 import com.jewelleryshop.management.model.vendor.BankDetails;
 import com.jewelleryshop.management.model.vendor.ContactDetails;
+import com.jewelleryshop.management.model.vendor.CreatVendorRequest;
 import com.jewelleryshop.management.model.vendor.FirmDetail;
 import com.jewelleryshop.management.model.vendor.ProductGallary;
 import com.jewelleryshop.management.model.vendor.SearchVendorRequest;
@@ -56,77 +59,97 @@ public class VendorServiceImpl implements VendorService {
 	@Value("${image.path.prefix}")
 	private String baseUrl;
 
-	public Vendor saveVendorContactDetails(String updateContactDetails, MultipartFile businessCardUrl,
+	@Override
+	public Vendor saveVendorFirmInfo(CreatVendorRequest creatVendorRequest) {
+		Vendor vendor = new Vendor();
+		vendor.setFirmName(creatVendorRequest.getFirmName());
+		vendor.setFirmType(creatVendorRequest.getFirmType());
+		return vendorRepository.save(vendor);
+	}
+
+	public void saveVendorContactDetails(String vendorId, String updateContactDetails, MultipartFile businessCardUrl,
 			MultipartFile profileImageUrl) {
 		logger.debug("Saving vendor with request: {}", updateContactDetails);
 
 		Gson gsonObj = new Gson();
-		ContactDetails vendorUpdateRequest = null;
+		List<ContactDetails> newContactDetails = null;
 		try {
-			vendorUpdateRequest = gsonObj.fromJson(updateContactDetails, ContactDetails.class);
+			newContactDetails = gsonObj.fromJson(updateContactDetails, new TypeToken<List<ContactDetails>>() {
+			}.getType());
 		} catch (JsonSyntaxException e) {
 			e.printStackTrace();
 		}
-		if (vendorUpdateRequest == null) {
+		if (newContactDetails == null) {
 			logger.error("Failed to parse contact details");
-			return null;
 		}
-
+		Vendor vendor = vendorRepository.findById(vendorId);
 		String imageId = UUID.randomUUID().toString();
 		if (businessCardUrl != null && !businessCardUrl.isEmpty()) {
 			String businessCardPath = imageUtil.saveImagePath(businessCardUrl, imageId);
-			vendorUpdateRequest.setBusinessCardUrl(businessCardPath);
+			for (ContactDetails contactDetail : newContactDetails) {
+				contactDetail.setBusinessCardUrl(businessCardPath);
+			}
 		}
 
 		if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
 			String profileImagePath = imageUtil.saveImagePath(profileImageUrl, imageId);
-			vendorUpdateRequest.setProfileImageUrl(profileImagePath);
+			for (ContactDetails contactDetail : newContactDetails) {
+				contactDetail.setProfileImageUrl(profileImagePath);
+			}
 		}
-		Vendor vendor = new Vendor();
-		vendor.setContactDetails(vendorUpdateRequest);
 
-		return vendorRepository.save(vendor);
+		// Update existing contact details or add new ones
+		List<ContactDetails> existingContactDetails = vendor.getContactDetails();
+		if (existingContactDetails == null) {
+			existingContactDetails = new ArrayList<>();
+		}
+		existingContactDetails.addAll(newContactDetails);
+		vendor.setContactDetails(existingContactDetails);
+		vendorRepository.save(vendor);
 	}
 
 	@Override
-	public void updateFirmDetails(String vendorId, List<FirmDetail> firmDetailList) {
+	public void updateFirmDetails(String vendorId, FirmDetail firmDetail) {
 		logger.debug("Updating firm details for vendor ID: {}", vendorId);
 		if (vendorId == null) {
 			throw new IllegalArgumentException("Vendor ID is missing from product gallery data");
 		}
 		Vendor vendor = vendorRepository.findById(vendorId);
-		if (vendor != null) {
-			List<FirmDetail> existingFirmDetails = vendor.getFirmDetail() != null ? vendor.getFirmDetail()
-					: new ArrayList<>();
-			existingFirmDetails.addAll(firmDetailList);
-
-			for (FirmDetail firmDetail : firmDetailList) {
-				firmDetail.setId(new ObjectId().toString());
-			}
-			vendor.setFirmDetail(existingFirmDetails);
-			vendorRepository.save(vendor);
-		} else {
+		if (vendor == null) {
 			logger.error("Vendor not found with ID: {}", vendorId);
 			throw new ResourceNotFoundException("Vendor not found with ID: " + vendorId);
 		}
+		vendor.setFirmDetail(firmDetail);
+		vendorRepository.save(vendor);
 	}
 
 	@Override
 	public void updateVendorGallery(String vendorId, String productGalleryJson, List<MultipartFile> productImages) {
 		logger.debug("Updating vendor gallery for vendor ID: {}", vendorId);
-		Gson gson = new Gson();
-		ProductGallary productGallery = null;
-		try {
-			productGallery = gson.fromJson(productGalleryJson, ProductGallary.class);
-		} catch (JsonSyntaxException e) {
-			e.printStackTrace();
 
-		}
-		if (vendorId == null) {
+		Gson gson = new Gson();
+
+		// Input Validation
+		if (vendorId == null || vendorId.isEmpty()) {
 			throw new IllegalArgumentException("Vendor ID is missing from product gallery data");
 		}
 
+		List<ProductGallary> updatedProductGallery = null;
+		try {
+			updatedProductGallery = gson.fromJson(productGalleryJson, new TypeToken<List<ProductGallary>>() {
+			}.getType());
+		} catch (JsonSyntaxException e) {
+			logger.error("Invalid product gallery JSON format", e);
+		}
+
+		// Fetch Vendor and Existing Gallery (Handle Null Cases)
 		Vendor vendor = vendorRepository.findById(vendorId);
+
+		List<ProductGallary> existingProductGallery = vendor.getGallery();
+		if (existingProductGallery == null) {
+			existingProductGallery = new ArrayList<>();
+		}
+
 		if (!CollectionUtils.isEmpty(productImages)) {
 			List<String> imageUrls = new ArrayList<>();
 			for (MultipartFile productImage : productImages) {
@@ -135,11 +158,20 @@ public class VendorServiceImpl implements VendorService {
 				imageUrls.add(imageUrl);
 			}
 
-			productGallery.setProductImage(imageUrls);
+			for (ProductGallary productGallery : updatedProductGallery) {
+				 if (productGallery.getProductImage() == null) {
+			            productGallery.setProductImage(new ArrayList<>());
+			        }
+			        productGallery.getProductImage().addAll(imageUrls);
+			    }
 		}
-		vendor.setGallery(productGallery);
+
+		// Update Vendor Gallery and Save
+		existingProductGallery.addAll(updatedProductGallery);
+		vendor.setGallery(existingProductGallery);
 		vendorRepository.save(vendor);
 
+		logger.debug("Vendor gallery for vendor ID: {} updated successfully", vendorId);
 	}
 
 	@Override
@@ -151,9 +183,14 @@ public class VendorServiceImpl implements VendorService {
 
 		Vendor vendor = vendorRepository.findById(vendorId);
 		if (vendor != null) {
+			List<BankDetails> existingBankDetails = vendor.getBankDetailList();
+			if (existingBankDetails == null) {
+				existingBankDetails = new ArrayList<>();
+			}
 			for (BankDetails bankDetail : bankDetails) {
 				bankDetail.validateAccountNumbers();
-				bankDetail.setId(new ObjectId().toString());
+				bankDetail.setId(new ObjectId().toString()); // Generate a new ID
+				existingBankDetails.add(bankDetail); // Add new bank detail to the existing list
 			}
 
 			vendor.setBankDetailList(bankDetails);
@@ -184,85 +221,89 @@ public class VendorServiceImpl implements VendorService {
 	public Vendor getVendorById(String id) {
 		logger.debug("Fetching vendor by ID: {}", id);
 		Vendor vendor = vendorRepository.findById(id);
+
 		if (vendor == null) {
 			logger.error("Vendor not found with ID: {}", id);
 			throw new ResourceNotFoundException("Vendor not found with ID: " + id);
 		}
-		ContactDetails contactDetail = vendor.getContactDetails();
 
-		// Set the business card URL
-		String businessCardUrl = contactDetail.getBusinessCardUrl();
-		if (businessCardUrl != null && !businessCardUrl.isEmpty()) {
-			// Normalize the path to use forward slashes
-			String normalizedBusinessCardUrl = businessCardUrl.replace("\\", "/");
-			contactDetail.setBusinessCardUrl(baseUrl + "/images/" + normalizedBusinessCardUrl);
+		// Process contact details
+		List<ContactDetails> contactDetails = vendor.getContactDetails();
+		if (contactDetails != null) {
+			for (ContactDetails contactDetail : contactDetails) {
+				String businessCardUrl = contactDetail.getBusinessCardUrl();
+				if (businessCardUrl != null && !businessCardUrl.isEmpty()) {
+					String normalizedBusinessCardUrl = businessCardUrl.replace("\\", "/");
+					contactDetail.setBusinessCardUrl(baseUrl + "/images/" + normalizedBusinessCardUrl);
+				}
+
+				String profileImageUrl = contactDetail.getProfileImageUrl();
+				if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
+					String normalizedProfileImageUrl = profileImageUrl.replace("\\", "/");
+					contactDetail.setProfileImageUrl(baseUrl + "/images/" + normalizedProfileImageUrl);
+				}
+			}
 		}
 
-		// Set the profile image URL
-		String profileImageUrl = contactDetail.getProfileImageUrl();
-		if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
-			// Normalize the path to use forward slashes
-			String normalizedProfileImageUrl = profileImageUrl.replace("\\", "/");
-			contactDetail.setProfileImageUrl(baseUrl + "/images/" + normalizedProfileImageUrl);
+		List<ProductGallary> galleryList = vendor.getGallery();
+		if (galleryList == null) {
+			galleryList = new ArrayList<>();
+			vendor.setGallery(galleryList); // Initialize with an empty list if null
 		}
-		ProductGallary gallary = vendor.getGallery();
-		if (gallary == null) {
-			gallary = new ProductGallary();
-			vendor.setGallery(gallary);// Create an empty gallery
-		}
-		List<String> productImageUrls = gallary.getProductImage();
-		if (productImageUrls != null) {
-			// Normalize and update each URL in the list
-			List<String> updatedProductImageUrls = productImageUrls.stream()
-					.filter(url -> url != null && !url.isEmpty()) // Ensure URL is not null or empty
-					.map(url -> {
-						// Normalize the path to use forward slashes
-						String normalizedUrl = url.replace("\\", "/");
-						return baseUrl + "/images/" + normalizedUrl;
-					}).collect(Collectors.toList());
 
-			gallary.setProductImage(updatedProductImageUrls);
+		for (ProductGallary gallery : galleryList) {
+			if (gallery != null && gallery.getProductImage() != null) {
+				List<String> productImageUrls = gallery.getProductImage().stream()
+						.filter(url -> url != null && !url.isEmpty())
+						.map(url -> baseUrl + "/images/" + url.replace("\\", "/")).collect(Collectors.toList());
+				gallery.setProductImage(productImageUrls);
+			}
 		}
 
 		return vendor;
 	}
 
-	@Override
 	public Page<Vendor> findAllVendors(int page, int size) {
 		logger.debug("Fetching all vendors with page: {}, size: {}", page, size);
 		Pageable pageable = PageRequest.of(page, size);
 		List<Vendor> vendorList = vendorRepository.findAllVendors(pageable);
-		vendorList.forEach(vendor -> {
-			ContactDetails contactDetail = vendor.getContactDetails();
-			String businessCardUrl = contactDetail.getBusinessCardUrl();
-			if (businessCardUrl != null && !businessCardUrl.isEmpty()) {
-				String normalizedBusinessCardUrl = businessCardUrl.replace("\\", "/");
-				contactDetail.setBusinessCardUrl(baseUrl + "/images/" + normalizedBusinessCardUrl);
+
+		// Process each vendor and contact details
+		for (Vendor vendor : vendorList) {
+			List<ContactDetails> contactDetails = vendor.getContactDetails();
+			if (contactDetails != null) {
+				for (ContactDetails contactDetail : contactDetails) {
+					String businessCardUrl = contactDetail.getBusinessCardUrl();
+					if (businessCardUrl != null && !businessCardUrl.isEmpty()) {
+						String normalizedBusinessCardUrl = businessCardUrl.replace("\\", "/");
+						contactDetail.setBusinessCardUrl(baseUrl + "/images/" + normalizedBusinessCardUrl);
+					}
+
+					String profileImageUrl = contactDetail.getProfileImageUrl();
+					if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
+						String normalizedProfileImageUrl = profileImageUrl.replace("\\", "/");
+						contactDetail.setProfileImageUrl(baseUrl + "/images/" + normalizedProfileImageUrl);
+					}
+				}
+			}
+			List<ProductGallary> galleryList = vendor.getGallery();
+			if (galleryList == null) {
+				galleryList = new ArrayList<>();
+				vendor.setGallery(galleryList); // Initialize with an empty list if null
 			}
 
-			String profileImageUrl = contactDetail.getProfileImageUrl();
-			if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
-				String normalizedProfileImageUrl = profileImageUrl.replace("\\", "/");
-				contactDetail.setProfileImageUrl(baseUrl + "/images/" + normalizedProfileImageUrl);
+			for (ProductGallary gallery : galleryList) {
+				if (gallery != null && gallery.getProductImage() != null) {
+					List<String> productImageUrls = gallery.getProductImage().stream()
+							.filter(url -> url != null && !url.isEmpty())
+							.map(url -> baseUrl + "/images/" + url.replace("\\", "/")).collect(Collectors.toList());
+					gallery.setProductImage(productImageUrls);
+				}
 			}
-			ProductGallary gallery = vendor.getGallery();
-			if (gallery == null) {
-				gallery = new ProductGallary();
-				vendor.setGallery(gallery);
-			}
-			List<String> productImageUrls = gallery.getProductImage();
-			if (productImageUrls != null) {
-				List<String> updatedProductImageUrls = productImageUrls.stream()
-						.filter(url -> url != null && !url.isEmpty()) // Ensure URL is not null or empty
-						.map(url -> {
-							String normalizedUrl = url.replace("\\", "/");
-							return baseUrl + "/images/" + normalizedUrl;
-						}).collect(Collectors.toList());
-				gallery.setProductImage(updatedProductImageUrls);
-			}
-		});
+		}
 
 		return new PageImpl<>(vendorList);
+
 	}
 
 	@Override
@@ -305,4 +346,11 @@ public class VendorServiceImpl implements VendorService {
 		return vendorRepository.searchVendor(vendorSearchRequest, pageable);
 
 	}
+
+	@Override
+	public void updateFirmDetails(String vendorId, List<FirmDetail> firmDetail) {
+		// TODO Auto-generated method stub
+
+	}
+
 }
